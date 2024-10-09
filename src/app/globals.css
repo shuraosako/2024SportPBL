@@ -8,8 +8,15 @@ header{
   width: 100vw;
   display: flex;
   align-items: center;
+  position: fixed;
+  z-index: 10;
+  padding: 10px 20px;
+  box-shadow: 0 4px 2px -2px gray;
+  border-bottom: 15px solid #ABDFDF;
+
 
 }
+
 .fit-ex{
   display: flex;
   margin: 0 0 0 20px;
