@@ -12,6 +12,8 @@ export default function Login() {
 
   return (
     <>
+
+    
       <header>
         <ul>
           <li className="logo">SportsPBL</li>
@@ -24,15 +26,17 @@ export default function Login() {
       </header>
 
       <div className="logunder">
+        
+
         <div className="log">
-          <div>
+          <div className="inputfield">
             <div className="kai"></div>
-            <label className="mailaddress">mailaddress</label>
-            <input type="text" id="mailaddress" name="mailaddress" />
+            <label className="mailaddress">EmailAddress</label>
+            <input type="logintext" id="mailaddress" name="mailaddress" />
           </div>
-          <div>
+          <div className="inputfield">
             <label className="pass">password</label>
-            <input type="password" id="pass" name="password" />
+            <input type="loginpassword" id="pass" name="password" />
           </div>
           <div className="kai"></div>
           <div className="login-button">

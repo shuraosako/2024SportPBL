@@ -4,7 +4,8 @@ import Link from 'next/link'
 export default function Homepage() {
   return (
     
-    <><header>
+    <>
+    <header>
       <ul>
         <li className="logo">SportsPBL</li>
         <div className="header-right">
@@ -13,7 +14,11 @@ export default function Homepage() {
           <li><a href="#">設定</a></li>
         </div>
       </ul>
+      
     </header>
+    
+
+    
     <div className="header-underline"></div>
     <div className="label-under">
     <div className="top-min">
@@ -21,6 +26,7 @@ export default function Homepage() {
           src="/images/baseball_ground.jpg" 
           alt="baseball_stadium"
           className="stadium-image"
+          layout = "responsive"
           width= {1300}
           height={200} 
         />
@@ -42,6 +48,7 @@ occaecat cupidatat non proident, sunt in culpa qui officia
       <Image 
           src="/images/fit.jpg" 
           alt="fit"
+          layout = "responsive"
           width= {600}
           height={600} 
         />
@@ -53,6 +60,7 @@ occaecat cupidatat non proident, sunt in culpa qui officia
       <Image 
           src="/images/rapsodo.jpg" 
           alt="rap"
+          layout = "responsive"
           width= {600}
           height={600} 
         />
@@ -72,11 +80,17 @@ occaecat cupidatat non proident, sunt in culpa qui officia
       </div>
       <div className="ground-underline"></div>
       <div className="last">
-      <div className="last-line"></div>
+        <li><Link href="/"></Link></li>
+        <div className="last-line">
+
+        </div>
+      
       </div>
       
 
       </>
+    
+
     
   );
 }

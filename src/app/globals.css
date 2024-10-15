@@ -122,97 +122,109 @@ header ul{
 }
 
 /*login*/
-.logunder{
-  height: 70vw;
+.logunder {
+  height: 100vh;
   width: 100vw;
-  background:linear-gradient(-45deg,#348d90,#ffffff,#348d90);
-  display:flex;
+  background-image: url('login/login_background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
-.log{
-  width: 50vw;
-  height: 45vw;
+
+
+
+.log {
+  width: 50%;
+  height: 100%; /* Change this to auto for flexibility */
   border-radius: 20px;
-  background-color: #ffffff;
-  margin: 0 25vw 0 25vw;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-weight: 600;
   font-size: 2.5vw;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; /* Center align children horizontally */
+}
+.inputfield{
+  align-items: center;
+  text-align: center;
 }
 
 label {
-  display:flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 25vw 0 25vw;
+  margin: 10px 0; /* Add margin for spacing */
+  font-size: 1vw; /* Increase font size for visibility */
+  color: black;
 }
+
 .kai {
-  margin-bottom: 5vw; 
+  margin-bottom: 5vw;
 }
-input{
-  margin-bottom: 3%;
-  display:flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  margin-left:14%;
-  width: 37vw;
-  height: 25px;
-}
-.addition{
+
+
+.addition {
   font-size: 1.2vw;
-  margin-left: 60%;
+  margin-top: 2vw; 
+  text-align: center; 
 }
 .login-button {
-
-  background-color: #5f989c; 
-  color: white; 
+  background-color: #5f989c;
+  color: white;
   border: 2px solid #41bbd0;
-  border-radius: 5px; 
-  padding: 10px 20px; 
-  font-size: 16px; 
-  cursor: pointer; 
+  border-radius: 5px;
+  padding: 8px 15px; 
+  font-size: 1.5vw; 
+  cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s;
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  width: 20vw;
-  height: 5vw;
-  margin-left:30% ;
+  width: 40%; 
+  height: 4vw; 
+  margin-top: 2vw; 
+  text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 .login-button:hover {
-  background-color: white; 
-  color: #22616c; 
-  border-color: #41bbd0; 
+  background-color: white;
+  color: #22616c;
+  border-color: #41bbd0;
 }
-input[type="text"],
-input[type="password"] {
-  height: 4vw;
-  width: 74%;
+
+input[type="logintext"],
+input[type="loginpassword"] {
+  height: 3vw;  
+  width: 100%;  
+  font-size: 1.8vw;
+  align-content: center; 
 }
+
 /*new account*/
 .newunder{
   height: 100vw;
   width: 100vw;
-  background:linear-gradient(-45deg,#348d90,#ffffff,#348d90);
+  background:#6FAAAA;
   display:flex;
   align-items: center;
   justify-content: center;
 }
+
 .new{
-  width: 50vw;
-  height: 60vw;
+  width: 50%;
+  height: 60%; 
   border-radius: 20px;
-  background-color: #ffffff;
-  margin: 0 25vw 0 25vw;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-weight: 600;
+  font-size: 2vw;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; /* Center align children horizontally */
+  
+}
+
+input[type="text"],
+input[type="password"]{
+  height:3vw;
+  width:100%;
   font-size: 1.8vw;
 }
 /*home*/
@@ -248,11 +260,11 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: 40px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
   width: 35%;
   margin:0.5vw 0.5vw ;
-  height: 20px;
-  position:0;
+  height: 10px;
+
 }

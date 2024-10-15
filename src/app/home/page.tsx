@@ -1,7 +1,10 @@
 import Image from "next/image"; 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+
+ 
   return (
     <>
       <header>
@@ -25,7 +28,7 @@ export default function Home() {
         <div className="Selection">
           <Link href="">Analysis<br/></Link>
           <div className="kai"></div>
-          <Link href="">Profile<br/></Link>
+          <Link href="/profile">Profile<br/></Link>
           <div className="kai"></div>
           <Link href="">Setting<br/></Link>
           <div className="kai"></div>
