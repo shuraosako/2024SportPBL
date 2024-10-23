@@ -226,48 +226,99 @@ input[type="password"],
 input[type='email']{
   height:3vw;
   width:100%;
-  font-size: 1.8vw;
+  font-size: 1.2vw;
 }
 /*home*/
 
-
-.LeftSelection{
-  height: 100vw;
-  width: 20%;
-  background-color:#73a6a7;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  align-items: center;
-  justify-content: center;
-}
-.Selection{
-  font-size: 2.5vw;
-  margin: 5vw 0 0 4vw;
-}
-
-.home-under{
-  display:flex;
-}
-.home-rightunder{
-  width: 80vw;
-  height: 98vw;
-  border-radius: 10px;
-  background-color: #ffffff;
-  justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  font-weight: 600;
-  font-size: 1.8vw;
-  margin: 1vw 1vw 1vw 1vw;
-}
-input {
-  margin-bottom: 3%;
+.header-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 40px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  width: 35%;
-  margin:0.5vw 0.5vw ;
-  height: 10px;
+  justify-content: space-between;
+  list-style-type: none;
+  padding: 10px 20px;
+  margin: 0;
+  box-sizing: border-box;
+}
 
+.logo {
+  flex: 1;
+  font-size: 24px;
+}
+
+.hamburger {
+  cursor: pointer;
+  font-size: 24px;
+  padding: 10px;
+}
+
+.header-right {
+  display: flex;
+  gap: 20px;
+}
+
+.main-content {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-top: 10px;
+}
+
+.LeftSelection {
+  position: relative;
+  top: 40px;
+  left: 0;
+  width: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  transition: width 0.3s ease-in-out;
+}
+
+.LeftSelection.open {
+  width: 250px;
+}
+
+.Selection {
+  padding: 20px;
+}
+
+.RightContent {
+  flex: 1;
+  background-color: #fafafa;
+  padding: 40px; /* Padding around the RightContent */
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: space-evenly; 
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dropdown-item {
+  flex: 1;
+  max-width: 180px; /* Increased width of each input field */
+  padding: 5px; /* Padding inside input fields */
+  font-size: 14px; /* Reduced font size for better appearance */
+  box-sizing: border-box;
+}
+
+.search-input {
+  margin-bottom: 10px;
+  padding: 6px;
+  width: 100%;
+  font-size: 14px; /* Font size for search input */
+}
+
+.date-picker {
+  height: 40px; /* Adjust height for the date picker */
+  font-size: 14px; /* Font size for the date picker */
+  width: 100%; /* Full width to match dropdown items */
+}
+
+.header-right li {
+  list-style: none;
+}
+
+.kai {
+  margin: 10px 0;
 }

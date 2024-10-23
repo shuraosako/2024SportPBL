@@ -1,56 +1,86 @@
-.off-screen-menu{
-    background-color: #9AE8E8;
-    height : 100vh;
-    width : 100%;
-    max-width: 450px;
-    position: fixed;
-    top: 0;
-    right: -450px;
+.header-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    font-size: 3rem;
-    transition: .3s ease;
-}
+    justify-content: space-between;
+    list-style-type: none;
+    padding: 10px 20px;
+    margin: 0;
+    box-sizing: border-box;
+  }
 
-.off-screen-menu.active{
-    right : 0;
+  .logo {
+    flex: 1;
+    font-size: 24px;
+  }
 
-}
+  .hamburger {
+    cursor: pointer;
+    font-size: 24px;
+    padding: 10px;
+  }
 
-nav{
-    padding : 1rem;
+  .header-right {
     display: flex;
-    background-color: #9AE8E8;
+    gap: 20px;
+  }
 
-}
+  .main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+    margin-top: 10px;
+  }
 
-.ham-menu{
-    height: 50px;
-    width: 50px;
-    margin-left: auto;
+  .LeftSelection {
     position: relative;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    transition: width 0.3s ease-in-out;
+  }
 
-}
+  .LeftSelection.open {
+    width: 250px;
+  }
 
-.ham-menu{
-    height: 5px;
+  .Selection {
+    padding: 20px;
+  }
+
+  .RightContent {
+    flex: 1;
+    background-color: #fafafa;
+    padding: 40px; /* Padding around the RightContent */
+  }
+
+  .dropdown-container {
+    display: flex;
+    justify-content:left; 
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .dropdown-item {
+    flex: 1;
+    max-width: 120px; /* Width of each input field */
+    padding: 5px; /* Padding inside input fields */
+    font-size: 7x; /* Font size */
+    box-sizing: border-box;
+  }
+
+  .search-input {
+    margin-bottom: 10px;
+    padding: 6px;
     width: 100%;
-    background-color: black;
-    border-radius: 25px;
-    position: absolute;
-    top:50%;
-    left:50%;
-    transform: translate(-50%, -50%);
-    transition: .3s ease;
-}
+    font-size: 14px;
+  }
 
-.ham-menu span:nth-child(1){
-    top: 25%;
+  .header-right li {
+    list-style: none;
+  }
 
-}
-.hame-menu span:nth-child(3){
-    top: 75%;
-}
+  .kai {
+    margin: 10px 0;
+  }
