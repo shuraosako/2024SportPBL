@@ -1,0 +1,36 @@
+.add-player-form {
+    padding: 20px;
+    max-width: 400px;
+    margin: auto;
+  }
+  
+  .add-player-form form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .add-player-form label {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .add-player-form input,
+  .add-player-form button {
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .add-player-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  
+  .add-player-form button:hover {
+    background-color: #0056b3;
+  }
+  

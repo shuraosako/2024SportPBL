@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; 
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCoq3lwqjKG1Ja9OQMlmQyOsBFot_fEMXU",
@@ -16,6 +17,7 @@ const firebaseConfig = {
   measurementId: "G-FYNN6VTDMJ"
 };
 const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 const auth = getAuth();
 
 export default function Login() {
@@ -25,12 +27,13 @@ export default function Login() {
   const [error, setError] = useState(""); // State for error messages
 
   const handleLoginClick = async () => {
+    setError(""); // Clear previous errors
     try {
-      // Attempt to sign in
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/home"); // Redirect to the home page on successful login
+      router.push("/home");
     } catch (err) {
-      setError("Failed to log in. Please check your credentials."); // Set error message
+      setError("Failed to log in. Please check your credentials.");
+      console.error("Login error:", err);
     }
   };
 

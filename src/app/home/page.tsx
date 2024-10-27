@@ -1,17 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Import the CSS for the date picker
 
 export default function Home() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // State to handle the selected date
   const [names, setNames] = useState(["John", "Jane", "Doe", "Mary", "James", "Lucy"]); // Dynamic list of names
   const [filteredNames, setFilteredNames] = useState(names); // Filtered names for search
   const [searchTerm, setSearchTerm] = useState(""); // State for searching names
   const [selectedYear, setSelectedYear] = useState("2024"); // State to handle the selected year
+
+  const handleLoginClick = async () => {
+    router.push("/create_player");
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -26,6 +32,7 @@ export default function Home() {
         name.toLowerCase().includes(searchValue)
       )
     );
+    
   };
 
   return (
@@ -64,7 +71,7 @@ export default function Home() {
         </div>
 
         {/* RightContent with Date, Searchable Name Dropdown, and Year dropdown */}
-        <div className="RightContent">
+        <div className="RightContenthome">
           <div className="dropdown-container">
             {/* Date Picker */}
             <DatePicker
@@ -103,15 +110,15 @@ export default function Home() {
               onChange={(e) => setSelectedYear(e.target.value)}
               className="dropdown-item"
             >
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
+              <option value="Year 1">Year 1</option>
+              <option value="Year 2">Year 2</option>
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4">Year 4</option>
               {/* Add more years as needed */}
             </select>
-          </div>
 
-          <h2>Right Section</h2>
-          <p>This is the content on the right side of the LeftSelection.</p>
+            <button type="button"onClick= {handleLoginClick}>+ New Player</button>
+          </div>
         </div>
       </div>
 
