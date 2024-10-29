@@ -37,11 +37,10 @@ export default function Home() {
     <>
       <header>
         <ul className="header-container">
-          <li className="logo">SportsPBL</li>
           <li className="hamburger" onClick={toggleMenu}>
             &#9776;
           </li>
-
+          <li className="logo">SportsPBL</li>
           <div className="header-right">
             <li><Link href="/login">LOGIN</Link></li>
             <li><Link href="http://localhost:3000">TOP</Link></li>
