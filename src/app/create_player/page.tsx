@@ -22,7 +22,7 @@ export default function Homepage() {
   };
 
   // Submit player data to Firebase
-  const handleAddPlayer = async (event) => {
+  const handleAddPlayer = async (event: { preventDefault: () => void; }) => {
     event.preventDefault(); // Prevent the default form submission behavior
 
     console.log("Adding player with details:", { playerName, grade, height, weight });

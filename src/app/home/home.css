@@ -1,86 +1,125 @@
+<<<<<<< HEAD
+.player-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+.player-card {
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background-color: #fff;
+=======
 .header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    list-style-type: none;
-    padding: 10px 20px;
-    margin: 0;
-    box-sizing: border-box;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
 
-  .logo {
-    flex: 1;
-    font-size: 24px;
-  }
+.hamburger {
+  cursor: pointer;
+  font-size: 24px;
+  padding: 10px 20px;
+  margin: 0;
+}
 
-  .hamburger {
-    cursor: pointer;
-    font-size: 24px;
-    padding: 10px;
-  }
+.logo {
+  flex: 1;
+  font-size: 24px;
+  padding-left: 20px;
+}
 
+.header-right {
+  display: flex;
+  gap: 20px;
+  padding-right: 20px;
+}
+
+.header-right li {
+  list-style: none;
+}
+
+.header-underline {
+  border-bottom: 1px solid #ccc;
+}
+
+.main-content {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-top: 10px;
+}
+
+.LeftSelection {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  transition: width 0.3s ease-in-out;
+}
+
+.LeftSelection.open {
+  width: 250px;
+}
+
+.Selection {
+  padding: 20px;
+}
+
+.kai {
+  margin: 10px 0;
+}
+
+.RightContent {
+  flex: 1;
+  background-color: #fafafa;
+  padding: 40px;
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dropdown-item {
+  flex: 1;
+  max-width: 120px;
+  padding: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.search-input {
+  margin-bottom: 10px;
+  padding: 6px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.header-right a {
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (max-width: 768px) {
   .header-right {
-    display: flex;
-    gap: 20px;
-  }
-
-  .main-content {
-    display: flex;
-    height: calc(100vh - 60px);
-    margin-top: 10px;
-  }
-
-  .LeftSelection {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    overflow: hidden;
-    background-color: #f0f0f0;
-    transition: width 0.3s ease-in-out;
-  }
-
-  .LeftSelection.open {
-    width: 250px;
-  }
-
-  .Selection {
-    padding: 20px;
-  }
-
-  .RightContent {
-    flex: 1;
-    background-color: #fafafa;
-    padding: 40px; /* Padding around the RightContent */
-  }
-
-  .dropdown-container {
-    display: flex;
-    justify-content:left; 
-    align-items: center;
-    margin-bottom: 20px;
+      gap: 10px;
+      padding-right: 10px;
   }
 
   .dropdown-item {
-    flex: 1;
-    max-width: 120px; /* Width of each input field */
-    padding: 5px; /* Padding inside input fields */
-    font-size: 7x; /* Font size */
-    box-sizing: border-box;
+      max-width: 100px;
   }
-
-  .search-input {
-    margin-bottom: 10px;
-    padding: 6px;
-    width: 100%;
-    font-size: 14px;
-  }
-
-  .header-right li {
-    list-style: none;
-  }
-
-  .kai {
-    margin: 10px 0;
-  }
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
+}
