@@ -1,8 +1,12 @@
 "use client";
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 import "./home.css";
 import { useState, useEffect } from "react";
+=======
+import { useState, ChangeEvent } from "react";
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
 =======
 import { useState, ChangeEvent } from "react";
 >>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
@@ -10,6 +14,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+<<<<<<< HEAD
 <<<<<<< HEAD
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../login/page";
@@ -44,6 +49,11 @@ export default function Home() {
 
 export default function Home() {
   const router = useRouter();
+=======
+
+export default function Home() {
+  const router = useRouter();
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [names, setNames] = useState<string[]>(["John", "Jane", "Doe", "Mary", "James", "Lucy"]);
@@ -54,6 +64,9 @@ export default function Home() {
   const handleLoginClick = async () => {
     router.push("/create_player");
   };
+<<<<<<< HEAD
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
+=======
 >>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
 
         // Populate unique names and grades for dropdowns
@@ -86,9 +99,12 @@ export default function Home() {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const handleLoginClick = () => {
     router.push("/create_player");
 =======
+=======
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchValue = event.target.value.toLowerCase();
     setSearchTerm(searchValue);
@@ -97,6 +113,9 @@ export default function Home() {
         name.toLowerCase().includes(searchValue)
       )
     );
+<<<<<<< HEAD
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
+=======
 >>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
   };
 
@@ -105,15 +124,21 @@ export default function Home() {
       <header>
         <ul className="header-container">
 <<<<<<< HEAD
+<<<<<<< HEAD
           <li className="logo">SportsPBL</li>
           <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             &#9776;
           </li>
 =======
+=======
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
           <li className="hamburger" onClick={toggleMenu}>
             &#9776;
           </li>
           <li className="logo">SportsPBL</li>
+<<<<<<< HEAD
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
+=======
 >>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
           <div className="header-right">
             <li><Link href="/login">LOGIN</Link></li>
@@ -227,6 +252,9 @@ export default function Home() {
             </select>
 
             <button type="button" onClick={handleLoginClick}>+ New Player</button>
+<<<<<<< HEAD
+>>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
+=======
 >>>>>>> 201b7e8b233febf488471551f0373b177dbc5a47
           </div>
         </div>
