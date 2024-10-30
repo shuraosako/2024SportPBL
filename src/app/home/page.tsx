@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import "./home.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
@@ -10,6 +11,7 @@ import { db } from "../login/page";
 
 // Define the Player type
 type Player = {
+  id: string;
   name: string;
   grade: string;
   height: number;
@@ -19,30 +21,32 @@ type Player = {
 export default function Home() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null); 
-  const [players, setPlayers] = useState<Player[]>([]); // All players with Player type
-  const [names, setNames] = useState<string[]>([]); // Unique names for dropdown
-  const [grades, setGrades] = useState<string[]>([]); // Unique grades for dropdown
-  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]); // Players after filtering
-  const [searchName, setSearchName] = useState(""); 
-  const [searchGrade, setSearchGrade] = useState(""); 
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [names, setNames] = useState<string[]>([]);
+  const [grades, setGrades] = useState<string[]>([]);
+  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
+  const [searchName, setSearchName] = useState("");
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
+  const [searchGrade, setSearchGrade] = useState("");
 
   useEffect(() => {
-    // Fetch player data from Firebase
     const fetchPlayers = async () => {
       try {
         const playerCollection = collection(db, "players");
         const playerSnapshot = await getDocs(playerCollection);
-        const playerList = playerSnapshot.docs.map(doc => doc.data() as Player); // Cast to Player type
+        const playerList = playerSnapshot.docs.map(doc => ({
+          id: doc.id,  // Include document ID
+          ...doc.data()
+        })) as Player[];
 
-        // Populate unique names and grades for dropdowns
         const uniqueNames = Array.from(new Set(playerList.map(player => player.name)));
         const uniqueGrades = Array.from(new Set(playerList.map(player => player.grade)));
 
         setPlayers(playerList);
         setNames(uniqueNames);
         setGrades(uniqueGrades);
-        setFilteredPlayers(playerList); // Initially show all players
+        setFilteredPlayers(playerList);
       } catch (error) {
         console.error("Error fetching players:", error);
       }
@@ -62,6 +66,24 @@ export default function Home() {
     }
 
     setFilteredPlayers(filtered);
+  };
+
+  const handleNameInputChange = (input: string) => {
+    setSearchName(input);
+
+    if (input) {
+      const suggestions = names.filter(name =>
+        name.toLowerCase().includes(input.toLowerCase())
+      );
+      setNameSuggestions(suggestions);
+    } else {
+      setNameSuggestions([]);
+    }
+  };
+
+  const handleNameSelect = (name: string) => {
+    setSearchName(name);
+    setNameSuggestions([]);
   };
 
   const handleLoginClick = () => {
@@ -110,19 +132,25 @@ export default function Home() {
               className="dropdown-item"
             />
 
-            {/* Name Filter */}
-            <select
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              className="dropdown-item"
-            >
-              <option value="">All Names</option>
-              {names.map((name, index) => (
-                <option key={index} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            {/* Name Autocomplete Search */}
+            <div className="name-autocomplete">
+              <input
+                type="text"
+                value={searchName}
+                onChange={(e) => handleNameInputChange(e.target.value)}
+                placeholder="Type to search names"
+                className="dropdown-item"
+              />
+              {nameSuggestions.length > 0 && (
+                <ul className="suggestions">
+                  {nameSuggestions.map((suggestion, index) => (
+                    <li key={index} onClick={() => handleNameSelect(suggestion)}>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
             {/* Grade Filter */}
             <select
@@ -144,34 +172,17 @@ export default function Home() {
 
           {/* Display Player Boxes */}
           <div className="player-cards-container">
-            {filteredPlayers.map((player, index) => (
-              <div key={index} className="player-card">
-                <h3>{player.name}</h3>
-                <p>Grade: {player.grade}</p>
-                <p>Height: {player.height} cm</p>
-                <p>Weight: {player.weight} kg</p>
-              </div>
-            ))}
+              {filteredPlayers.map((player) => (
+                <Link key={player.id} href={`/player/${player.id}`} className="player-card">
+                  <h3>{player.name}</h3>
+                  <p>Grade: {player.grade}</p>
+                  <p>Height: {player.height} cm</p>
+                  <p>Weight: {player.weight} kg</p>
+                </Link>
+              ))}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .player-cards-container {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          margin-top: 20px;
-        }
-        .player-card {
-          border: 1px solid #ccc;
-          padding: 16px;
-          border-radius: 8px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          text-align: center;
-          background-color: #fff;
-        }
-      `}</style>
     </>
   );
 }
