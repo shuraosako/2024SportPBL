@@ -11,7 +11,7 @@ export default function Homepage() {
         <div className="header-right">
           <li><Link href="/login">LOGIN</Link></li>
           <li><a href="">TOP</a></li>
-          <li><a href="#">設定</a></li>
+          <li><a href="#">setting</a></li>
         </div>
       </ul>
       
