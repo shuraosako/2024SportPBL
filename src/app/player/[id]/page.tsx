@@ -43,7 +43,7 @@ export default function PlayerPage() {
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading..</div>; 
   }
 
   if (!player) {
