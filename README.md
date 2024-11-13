@@ -1,4 +1,5 @@
 # SportsPBL
+![image](https://github.com/user-attachments/assets/65a6f7e2-39b2-45fc-9f36-50c43b149ade)
 
 ## 📝 Project Overview
 SportsPBL is a web application designed for managing and analyzing baseball player data. It enables coaches and staff to track player performance and make data-driven decisions.
