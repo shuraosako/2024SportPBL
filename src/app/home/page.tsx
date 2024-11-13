@@ -1,4 +1,5 @@
 "use client";
+// change
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -79,7 +80,7 @@ export default function Home() {
           <div className="header-right">
             <li><Link href="/login">LOGIN</Link></li>
             <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">設定</a></li>
+            <li><a href="#">Setting</a></li>
           </div>
         </ul>
       </header>
