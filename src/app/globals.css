@@ -134,11 +134,20 @@ header ul{
   justify-content: center;
 }
 
+.logframe{
+  justify-content: space-evenly;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  
+}
+
 
 
 .log {
-  width: 50%;
-  height: 100%; /* Change this to auto for flexibility */
+  width: 40vw;
+  height: 32vw; /* Change this to auto for flexibility */
   border-radius: 20px;
   justify-content: center;
   font-weight: 600;
@@ -146,16 +155,21 @@ header ul{
   display: flex; 
   flex-direction: column; 
   align-items: center; /* Center align children horizontally */
+  background-color: #ffffff;
+  border: 1.8px solid #336f79;
+  margin-top: 10%;
 }
 .inputfield{
   align-items: center;
   text-align: center;
+  
 }
 
 label {
   margin: 10px 0; /* Add margin for spacing */
   font-size: 1vw; /* Increase font size for visibility */
   color: black;
+  
 }
 
 .kai {
@@ -171,7 +185,6 @@ label {
 .login-button {
   background-color: #5f989c;
   color: white;
-  border: 2px solid #41bbd0;
   border-radius: 5px;
   padding: 8px 15px; 
   font-size: 1vw; 
@@ -227,7 +240,8 @@ input[type='email']{
   height:3vw;
   width:100%;
   font-size: 1.2vw;
-  box-shadow: black;
+  background:#c3d1d9;
+  border-radius: 5px;
 }
 /*home*/
 
