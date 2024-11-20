@@ -1,4 +1,5 @@
 "use client";
+// change
 
 import { useState, useEffect } from "react";
 import "./home.css";
@@ -183,6 +184,9 @@ export default function Home() {
                 </div>
               )}
             </li>
+            <li><Link href="/login">LOGIN</Link></li>
+            <li><Link href="http://localhost:3000">TOP</Link></li>
+            <li><a href="#">Setting</a></li>
           </div>
         </ul>
       </header>

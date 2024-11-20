@@ -58,9 +58,10 @@ export default function Login() {
       </header>
 
       <div className="logunder">
+        <div className="logframe">
         <div className="log">
           <div className="inputfield">
-            <div className="kai"></div>
+          
             <label className="mailaddress">Email Address</label>
             <input
               type="email"
@@ -86,6 +87,7 @@ export default function Login() {
           <div className="kai"></div>
           <div className="login-button">
             <button type="button" onClick={handleLoginClick}>Login</button> {/* Redirect only after click */}
+          </div>
           </div>
           <div className="kai"></div>
           <div className="addition">

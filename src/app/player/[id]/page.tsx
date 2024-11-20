@@ -14,7 +14,9 @@ type Player = {
   grade: string;
   height: number;
   weight: number;
+
   imageURL?: string;
+
 };
 
 export default function PlayerPage() {
@@ -91,6 +93,7 @@ export default function PlayerPage() {
       {player.imageURL && (
         <img
           src={player.imageURL}
+
           alt={`${player.name}'s profile`}
           className={styles.profilePicture}
         />
