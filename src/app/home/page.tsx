@@ -6,16 +6,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../login/page";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Image from "next/image";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-// Define the Player type
+// Define the Player type with imageURL and creationDate
 type Player = {
   id: string;
   name: string;
   grade: string;
   height: number;
   weight: number;
+  imageURL?: string;
+  creationDate?: { seconds: number; nanoseconds: number }; // Firestore timestamp format
 };
 
 export default function Home() {
@@ -23,30 +28,34 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [names, setNames] = useState<string[]>([]);
   const [grades, setGrades] = useState<string[]>([]);
-  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // For profile pop-up
+  const [profileImage, setProfileImage] = useState<string | null>(null); // User's profile image
+  const [userName, setUserName] = useState<string | null>(null); // User's name or email
 
+  // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const playerCollection = collection(db, "players");
         const playerSnapshot = await getDocs(playerCollection);
-        const playerList = playerSnapshot.docs.map(doc => ({
-          id: doc.id,  // Include document ID
-          ...doc.data()
+        const playerList = playerSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
         })) as Player[];
 
-        const uniqueNames = Array.from(new Set(playerList.map(player => player.name)));
-        const uniqueGrades = Array.from(new Set(playerList.map(player => player.grade)));
+        const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
+        const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
 
         setPlayers(playerList);
+        setFilteredPlayers(playerList);
         setNames(uniqueNames);
         setGrades(uniqueGrades);
-        setFilteredPlayers(playerList);
       } catch (error) {
         console.error("Error fetching players:", error);
       }
@@ -55,14 +64,66 @@ export default function Home() {
     fetchPlayers();
   }, []);
 
+  // Fetch the logged-in user's profile photo
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserName(user.email); // Assuming email is used as the username
+        console.log("User UID: ", user.uid); // Log the UID for debugging
+  
+        try {
+          const userDocRef = doc(db, "users", user.uid); // Path to Firestore document
+          const userDoc = await getDoc(userDocRef);
+  
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            console.log("User Document Data: ", data); // Log the entire user document
+  
+            // Fetch the correct field: profileImageUrl
+            const profileImageUrl = data?.profileImageUrl || null; // Use profileImageUrl (with lowercase 'u')
+            console.log("Fetched Profile Image URL: ", profileImageUrl); // Log for debugging
+  
+            setProfileImage(profileImageUrl); // Set the profile photo URL from Firestore
+          } else {
+            console.log("User document does not exist.");
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      } else {
+        router.push("/login"); // Redirect to login if not logged in
+      }
+    });
+  }, [router]);
+  
+
+  const formatCreationDate = (timestamp?: { seconds: number; nanoseconds: number }) => {
+    return timestamp
+      ? new Date(timestamp.seconds * 1000).toLocaleDateString("en-GB") // Format as DD/MM/YYYY
+      : "Unknown date";
+  };
+
   const handleFilter = () => {
     let filtered = players;
 
     if (searchName) {
-      filtered = filtered.filter(player => player.name === searchName);
+      filtered = filtered.filter((player) => player.name.toLowerCase().includes(searchName.toLowerCase()));
     }
+
     if (searchGrade) {
-      filtered = filtered.filter(player => player.grade === searchGrade);
+      filtered = filtered.filter((player) => player.grade === searchGrade);
+    }
+
+    if (selectedDate) {
+      const selectedDateString = selectedDate.toLocaleDateString("en-GB");
+      filtered = filtered.filter((player) => {
+        if (player.creationDate) {
+          const creationDate = new Date(player.creationDate.seconds * 1000).toLocaleDateString("en-GB");
+          return creationDate === selectedDateString;
+        }
+        return false;
+      });
     }
 
     setFilteredPlayers(filtered);
@@ -72,7 +133,7 @@ export default function Home() {
     setSearchName(input);
 
     if (input) {
-      const suggestions = names.filter(name =>
+      const suggestions = names.filter((name) =>
         name.toLowerCase().includes(input.toLowerCase())
       );
       setNameSuggestions(suggestions);
@@ -86,8 +147,16 @@ export default function Home() {
     setNameSuggestions([]);
   };
 
-  const handleLoginClick = () => {
+  const handleAddNewPlayer = () => {
     router.push("/create_player");
+  };
+
+  const toggleProfilePopup = () => {
+    setIsProfileOpen(!isProfileOpen);
+  };
+
+  const navigateToProfile = () => {
+    router.push("/profile");
   };
 
   return (
@@ -99,9 +168,21 @@ export default function Home() {
             &#9776;
           </li>
           <div className="header-right">
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">設定</a></li>
+            {/* Profile Photo */}
+            <li className="profile-section" onClick={toggleProfilePopup}>
+              <img
+                src={profileImage || "/default-profile.png"} // Default profile image if not available
+                alt="Profile"
+                className="profile-image"
+              />
+              {isProfileOpen && (
+                <div className="profile-popup">
+                  <p>{userName}</p>
+                  <button onClick={navigateToProfile}>Profile</button>
+                  <button onClick={() => router.push("/login")}>Logout</button>
+                </div>
+              )}
+            </li>
           </div>
         </ul>
       </header>
@@ -116,13 +197,14 @@ export default function Home() {
             <div className="kai"></div>
             <Link href="/profile">Profile</Link>
             <div className="kai"></div>
-            <Link href="">Setting</Link>
+            <Link href="">Settings</Link>
             <div className="kai"></div>
             <Link href="">Rapsodo</Link>
           </div>
         </div>
 
         <div className="RightContenthome">
+          {/* Filters */}
           <div className="dropdown-container">
             <DatePicker
               selected={selectedDate}
@@ -132,13 +214,12 @@ export default function Home() {
               className="dropdown-item"
             />
 
-            {/* Name Autocomplete Search */}
             <div className="name-autocomplete">
               <input
                 type="text"
                 value={searchName}
                 onChange={(e) => handleNameInputChange(e.target.value)}
-                placeholder="Type to search names"
+                placeholder="Search by name"
                 className="dropdown-item"
               />
               {nameSuggestions.length > 0 && (
@@ -152,7 +233,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Grade Filter */}
             <select
               value={searchGrade}
               onChange={(e) => setSearchGrade(e.target.value)}
@@ -166,20 +246,28 @@ export default function Home() {
               ))}
             </select>
 
-            <button type="button" onClick={handleFilter}>Filter</button>
-            <button type="button" onClick={handleLoginClick}>+ New Player</button>
+            <button onClick={handleFilter}>Filter</button>
+            <button onClick={handleAddNewPlayer}>+ New Player</button>
           </div>
 
-          {/* Display Player Boxes */}
+          {/* Player Cards */}
           <div className="player-cards-container">
-              {filteredPlayers.map((player) => (
+            {filteredPlayers.length > 0 ? (
+              filteredPlayers.map((player) => (
                 <Link key={player.id} href={`/player/${player.id}`} className="player-card">
+                  {player.imageURL && (
+                    <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
+                  )}
                   <h3>{player.name}</h3>
                   <p>Grade: {player.grade}</p>
                   <p>Height: {player.height} cm</p>
                   <p>Weight: {player.weight} kg</p>
+                  <p>Joined: {formatCreationDate(player.creationDate)}</p>
                 </Link>
-              ))}
+              ))
+            ) : (
+              <p>No players found. Adjust your filters or add a new player.</p>
+            )}
           </div>
         </div>
       </div>
