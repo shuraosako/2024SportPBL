@@ -164,10 +164,10 @@ export default function Home() {
     <>
       <header>
         <ul className="header-container">
-          <li className="logo">SportsPBL</li>
-          <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             &#9776;
           </li>
+          <li className="logo">SportsPBL</li>
           <div className="header-right">
             {/* Profile Photo */}
             <li className="profile-section" onClick={toggleProfilePopup}>

@@ -117,7 +117,7 @@ header ul{
 }
 .last-line{
   width: 100vw;
-  height: 200px;
+  height: 80px;
   background-color: #c1bdbd;
 }
 
@@ -131,7 +131,6 @@ header ul{
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 .logframe{
@@ -156,8 +155,10 @@ header ul{
   flex-direction: column; 
   align-items: center; /* Center align children horizontally */
   background-color: #ffffff;
-  border: 1.8px solid #336f79;
-  margin-top: 10%;
+  border: 1.8px solid #96acb0;
+  margin-top: 15%;
+  margin-left: 28vw;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 .inputfield{
   align-items: center;
@@ -180,7 +181,7 @@ label {
 .addition {
   font-size: 1.2vw;
   margin-top: 2vw; 
-  text-align: center; 
+  margin-left: 41vw; 
 }
 .login-button {
   background-color: #5f989c;
@@ -239,7 +240,7 @@ input[type="password"],
 input[type='email']{
   height:3vw;
   width:100%;
-  font-size: 1.2vw;
+  font-size: 8px;
   background:#c3d1d9;
   border-radius: 5px;
 }
