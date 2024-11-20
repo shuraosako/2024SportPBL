@@ -1,5 +1,3 @@
-// PlayerPage.tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,7 +14,9 @@ type Player = {
   grade: string;
   height: number;
   weight: number;
-  imageUrl?: string;
+
+  imageURL?: string;
+
 };
 
 export default function PlayerPage() {
@@ -90,9 +90,10 @@ export default function PlayerPage() {
       <p className={styles.info}>Height: {player.height} cm</p>
       <p className={styles.info}>Weight: {player.weight} kg</p>
       
-      {player.imageUrl && (
+      {player.imageURL && (
         <img
-          src={player.imageUrl}
+          src={player.imageURL}
+
           alt={`${player.name}'s profile`}
           className={styles.profilePicture}
         />

@@ -1,59 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import "./create_player.css"
+import "./create_player.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { db } from "../login/page"; // Import Firebase config
+import { db, storage } from "../login/page"; // Import Firebase storage and Firestore
 import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase storage functions
+import Image from "next/image";
 
 export default function Homepage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [error, setError] = useState(""); // State for error messages
+  const [error, setError] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [grade, setGrade] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [date, setDate] = useState(""); // New state for the selected date
+  const [image, setImage] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
 
-  // Toggle for sidebar menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Submit player data to Firebase
-  const handleAddPlayer = async (event: { preventDefault: () => void; }) => {
-    event.preventDefault(); // Prevent the default form submission behavior
+  // Handle image file selection
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setImage(file);
 
-    console.log("Adding player with details:", { playerName, grade, height, weight });
+      // Preview image
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageURL(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    // Validate the input fields
-    if (!playerName || !grade || !height || !weight) {
-        setError("All fields are required.");
-        return;
+  const handleAddPlayer = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+
+    if (!playerName || !grade || !height || !weight || !date || !image) {
+      setError("All fields, including profile photo and date, are required.");
+      return;
     }
 
     try {
-        // Attempt to add the player to Firestore
-        await addDoc(collection(db, "players"), {
-            name: playerName,
-            grade: grade,
-            height: height,
-            weight: weight,
-        });
-        console.log("Player added successfully!"); // Log success
+      let imageDownloadURL = "";
 
-        // Clear fields and reset error state if necessary
-        setPlayerName("");
-        setGrade("");
-        setHeight("");
-        setWeight("");
-        setError(""); // Clear previous errors
+      // Upload image to Firebase Storage
+      if (image) {
+        const imageRef = ref(storage, `player-images/${image.name}`);
+        await uploadBytes(imageRef, image);
+        imageDownloadURL = await getDownloadURL(imageRef);
+      }
+
+      // Add player data to Firestore
+      await addDoc(collection(db, "players"), {
+        name: playerName,
+        grade: grade,
+        height: height,
+        weight: weight,
+        creationDate: date, // Store manually selected date
+        imageURL: imageDownloadURL, // Store image URL
+      });
+
+      // Clear form fields and image preview
+      setPlayerName("");
+      setGrade("");
+      setHeight("");
+      setWeight("");
+      setDate("");
+      setImage(null);
+      setImageURL(null);
+      setError("");
     } catch (err) {
-        console.error("Error adding player:", err); // Log the error
-        setError("Failed to add player.");
+      console.error("Error adding player:", err);
+      setError("Failed to add player.");
     }
-};
+  };
 
   return (
     <>
@@ -90,6 +118,14 @@ export default function Homepage() {
         {/* Add Player Form */}
         <div className="add-player-form">
           <h2>Add New Player</h2>
+
+          {/* Profile Image Preview */}
+          {imageURL && (
+            <div className="image-preview">
+              <Image src={imageURL} alt="Profile Preview" width={100} height={100} className="profile-image" />
+            </div>
+          )}
+
           <form onSubmit={handleAddPlayer}>
             <label>Player's Name:</label>
             <input
@@ -123,10 +159,25 @@ export default function Homepage() {
               required
             />
 
-              <button onClick={handleAddPlayer}>Add Player</button>
+            {/* Date Selection */}
+            <label>Date:</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
+
+            {/* Image Upload */}
+            <label>Profile Photo:</label>
+            <input type="file" accept="image/*" onChange={handleImageChange} required />
+
+            <button type="submit">Add Player</button>
           </form>
+          {error && <p className="error-message">{error}</p>}
         </div>
       </div>
+
     </>
   );
 }

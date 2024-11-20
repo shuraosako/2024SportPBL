@@ -1,10 +1,12 @@
 "use client";
-import Image from "next/image"; 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -14,16 +16,18 @@ const firebaseConfig = {
   storageBucket: "sports-pbl.appspot.com",
   messagingSenderId: "182306703534",
   appId: "1:182306703534:web:86b8757669edf89f24453f",
-  measurementId: "G-FYNN6VTDMJ"
+  measurementId: "G-FYNN6VTDMJ",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
+const storage = getStorage();
+const db = getFirestore();
 
 export default function Login() {
   const router = useRouter();
-  const [profileImage, setProfileImage] = useState<string | null>(null); 
+  const [profileImage, setProfileImage] = useState<File | null>(null); // Use File type
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,33 +37,44 @@ export default function Login() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target && typeof e.target.result === "string") {
-          setProfileImage(e.target.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      setProfileImage(file);
     }
   };
 
+  // Upload image to Firebase Storage
+  const uploadImage = async (file: File, userId: string) => {
+    const imageRef = ref(storage, `profile-images/${userId}`);
+    await uploadBytes(imageRef, file);
+    return getDownloadURL(imageRef); // This will return the public URL of the uploaded image
+  };
+
   // Handle registration
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        alert(`Account created successfully for ${user.email}`);
-        // Redirect after registration if needed
-        router.push("/login");
-      })
-      .catch((error) => {
-        setError(error.message);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      let imageUrl = "";
+      if (profileImage) {
+        imageUrl = await uploadImage(profileImage, user.uid); // Upload image if provided
+      }
+
+      // Save user data in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        profileImageUrl: imageUrl, // Save the image URL
       });
+
+      alert(`Account created successfully for ${user.email}`);
+      router.push("/login");
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -74,7 +89,7 @@ export default function Login() {
           </div>
         </ul>
       </header>
-      
+
       <div className="newunder">
         <div className="new">
           <div className="profile-upload" style={{ textAlign: 'center', margin: '20px 0' }}>
@@ -99,7 +114,7 @@ export default function Login() {
               }}>
                 {profileImage ? (
                   <Image 
-                    src={profileImage} 
+                    src={URL.createObjectURL(profileImage)} 
                     alt="Profile Picture" 
                     layout="fill" 
                     objectFit="cover"
