@@ -14,9 +14,12 @@ type Player = {
   grade: string;
   height: number;
   weight: number;
-
   imageURL?: string;
+};
 
+// ファイルデータの型定義
+type FileRow = {
+  [key: string]: string | number | null;
 };
 
 export default function PlayerPage() {
@@ -24,7 +27,7 @@ export default function PlayerPage() {
   const router = useRouter();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fileData, setFileData] = useState<any[]>([]);
+  const [fileData, setFileData] = useState<FileRow[]>([]);
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -55,20 +58,18 @@ export default function PlayerPage() {
       reader.onload = (e) => {
         const data = e.target?.result;
         if (file.type === "text/csv") {
-          // Parse CSV file
           Papa.parse(data as string, {
             header: true,
             complete: (result) => {
-              setFileData(result.data);
+              setFileData(result.data as FileRow[]);
             },
           });
         } else if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-          // Parse XLSX file
           const workbook = XLSX.read(data, { type: "binary" });
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(sheet);
-          setFileData(jsonData as any[]);
+          setFileData(jsonData as FileRow[]);
         }
       };
       reader.readAsBinaryString(file);
@@ -93,7 +94,6 @@ export default function PlayerPage() {
       {player.imageURL && (
         <img
           src={player.imageURL}
-
           alt={`${player.name}'s profile`}
           className={styles.profilePicture}
         />
@@ -103,7 +103,6 @@ export default function PlayerPage() {
         Back to Home
       </button>
 
-      {/* File Upload Section */}
       <input
         type="file"
         accept=".csv, .xlsx"
@@ -111,7 +110,6 @@ export default function PlayerPage() {
         className={styles.fileInput}
       />
 
-      {/* Display uploaded file data */}
       {fileData.length > 0 && (
         <div className={styles.tableContainer}>
           <table className={styles.table}>
@@ -125,8 +123,10 @@ export default function PlayerPage() {
             <tbody>
               {fileData.map((row, index) => (
                 <tr key={index}>
-                  {Object.values(row).map((value, i) => (
-                    <td key={i}>{value}</td>
+                  {Object.entries(row).map(([key, value], i) => (
+                    <td key={`${index}-${key}`}>
+                      {value !== null ? String(value) : ""}
+                    </td>
                   ))}
                 </tr>
               ))}
