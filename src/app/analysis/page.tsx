@@ -25,7 +25,8 @@ const COLORS = {
 
 // データ型の定義
 type PlayerData = {
-  id: number;
+  id: string;
+  documentId?: string;
   date: string;
   speed: number;
   spin: number;
@@ -38,6 +39,8 @@ type PlayerData = {
   releasePoint: number;
   absorption: string;
 };
+
+type SortableField = 'date' | 'speed' | 'spin';
 
 type Player = {
   id: string;
@@ -54,7 +57,7 @@ export default function AnalysisPage() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showAllPeriod, setShowAllPeriod] = useState(true);
-  const [selectedItem, setSelectedItem] = useState("date");
+  const [selectedItem, setSelectedItem] = useState<SortableField>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
@@ -113,7 +116,8 @@ export default function AnalysisPage() {
           const querySnapshot = await getDocs(collection(db, `players/${playerId}/csv`));
           const playerData = querySnapshot.docs.map(doc => ({
             ...doc.data(),
-            id: parseInt(doc.id)
+            id: playerId,
+            documentId: doc.id
           })) as PlayerData[];
           data = [...data, ...playerData];
         }
@@ -126,15 +130,29 @@ export default function AnalysisPage() {
           });
         }
 
-        // ソート
         data.sort((a, b) => {
-          const aValue = a[selectedItem as keyof PlayerData];
-          const bValue = b[selectedItem as keyof PlayerData];
+          const getValueSafely = (item: PlayerData, key: SortableField) => {
+            switch(key) {
+              case 'date':
+                return item.date;
+              case 'speed':
+                return item.speed;
+              case 'spin':
+                return item.spin;
+              default:
+                return 0;
+            }
+          };
+        
+          const aValue = getValueSafely(a, selectedItem);
+          const bValue = getValueSafely(b, selectedItem);
+        
           return sortOrder === "asc" 
             ? (aValue < bValue ? -1 : 1)
             : (aValue > bValue ? -1 : 1);
         });
 
+        console.log('Fetched Data:', data); // デバッグ用
         setPlayerData(data);
       } catch (error) {
         console.error("Error fetching player data:", error);
@@ -143,7 +161,6 @@ export default function AnalysisPage() {
 
     fetchPlayerData();
   }, [selectedPlayers, startDate, endDate, showAllPeriod, selectedItem, sortOrder, players]);
-
   const toggleProfilePopup = () => {
     setIsProfileOpen(!isProfileOpen);
   };
@@ -171,42 +188,50 @@ export default function AnalysisPage() {
 
   // 平均値の計算
   const calculateAverages = () => {
-    return players.map(player => {
-      const playerStats = playerData.filter(data => data.id.toString() === player.id);
+    const averages = players.map(player => {
+      const playerStats = playerData.filter(data => data.id === player.id);
+      console.log('Player Stats:', player.name, playerStats); // デバッグ用
       return {
         name: player.name,
         avgSpeed: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + item.speed, 0) / playerStats.length
+          ? playerStats.reduce((sum, item) => sum + Number(item.speed), 0) / playerStats.length
           : 0,
         avgSpin: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + item.spin, 0) / playerStats.length
+          ? playerStats.reduce((sum, item) => sum + Number(item.spin), 0) / playerStats.length
           : 0
       };
     });
+    console.log('Averages:', averages); // デバッグ用
+    return averages;
   };
 
   // 最高記録の計算
   const calculateBest = () => {
-    return players.map(player => {
+    const best = players.map(player => {
       const playerStats = playerData.filter(data => data.id.toString() === player.id);
       return {
         name: player.name,
-        bestSpeed: playerStats.length ? Math.max(...playerStats.map(item => item.speed)) : 0,
-        bestSpin: playerStats.length ? Math.max(...playerStats.map(item => item.spin)) : 0
+        bestSpeed: playerStats.length ? Math.max(...playerStats.map(item => Number(item.speed))) : 0,
+        bestSpin: playerStats.length ? Math.max(...playerStats.map(item => Number(item.spin))) : 0
       };
     });
+    console.log('Best Records:', best); // デバッグ用
+    return best;
   };
 
   // 個人グラフデータの処理
   const getIndividualData = (playerId: string) => {
-    return playerData
-      .filter(data => data.id.toString() === playerId)
+    const data = playerData
+      .filter(data => data.id === playerId)
       .map(data => ({
         date: data.date,
-        speed: data.speed,
-        spin: data.spin,
+        speed: Number(data.speed),
+        spin: Number(data.spin),
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    console.log('Individual Data:', data); // デバッグ用
+    return data;
   };
 
   return (
@@ -292,11 +317,11 @@ export default function AnalysisPage() {
               </div>
 
               <div className="sort-filter">
-                <select
-                  value={selectedItem}
-                  onChange={(e) => setSelectedItem(e.target.value)}
-                  className="select-box"
-                >
+              <select
+                value={selectedItem}
+                onChange={(e) => setSelectedItem(e.target.value as SortableField)}
+                className="select-box"
+              >
                   <option value="date">日付</option>
                   <option value="speed">球速</option>
                   <option value="spin">SPIN</option>
@@ -381,12 +406,37 @@ export default function AnalysisPage() {
                       <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={calculateAverages()}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
+                          <XAxis dataKey="name" stroke="#666" />
+                          <YAxis 
+                            yAxisId="speed"
+                            orientation="left"
+                            stroke={COLORS.primary}
+                            domain={['auto', 'auto']}
+                          />
+                          <YAxis 
+                            yAxisId="spin"
+                            orientation="right"
+                            stroke={COLORS.secondary}
+                            domain={['auto', 'auto']}
+                          />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
-                          <Line type="monotone" dataKey="avgSpeed" stroke={COLORS.primary} name="平均球速" />
-                          <Line type="monotone" dataKey="avgSpin" stroke={COLORS.secondary} name="平均SPIN" />
+                          <Line 
+                            yAxisId="speed"
+                            type="monotone" 
+                            dataKey="avgSpeed" 
+                            stroke={COLORS.primary} 
+                            name="平均球速"
+                            dot={true}
+                          />
+                          <Line 
+                            yAxisId="spin"
+                            type="monotone" 
+                            dataKey="avgSpin" 
+                            stroke={COLORS.secondary} 
+                            name="平均SPIN"
+                            dot={true}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -394,13 +444,12 @@ export default function AnalysisPage() {
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={calculateAverages()}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
+                          <XAxis dataKey="name" stroke="#666" />
+                          <YAxis stroke="#666" />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
                           <Bar dataKey="avgSpeed" fill={COLORS.primary} name="平均球速" />
-                          <Bar dataKey="avgSpeed" fill={COLORS.primary} name="平均球速" />
-<Bar dataKey="avgSpin" fill={COLORS.secondary} name="平均SPIN" />
+                          <Bar dataKey="avgSpin" fill={COLORS.secondary} name="平均SPIN" />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -416,12 +465,37 @@ export default function AnalysisPage() {
                       <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={calculateBest()}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
+                          <XAxis dataKey="name" stroke="#666" />
+                          <YAxis 
+                            yAxisId="speed"
+                            orientation="left"
+                            stroke={COLORS.primary}
+                            domain={['auto', 'auto']}
+                          />
+                          <YAxis 
+                            yAxisId="spin"
+                            orientation="right"
+                            stroke={COLORS.secondary}
+                            domain={['auto', 'auto']}
+                          />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
-                          <Line type="monotone" dataKey="bestSpeed" stroke={COLORS.primary} name="最高球速" />
-                          <Line type="monotone" dataKey="bestSpin" stroke={COLORS.secondary} name="最高SPIN" />
+                          <Line 
+                            yAxisId="speed"
+                            type="monotone" 
+                            dataKey="bestSpeed" 
+                            stroke={COLORS.primary} 
+                            name="最高球速"
+                            dot={true}
+                          />
+                          <Line 
+                            yAxisId="spin"
+                            type="monotone" 
+                            dataKey="bestSpin" 
+                            stroke={COLORS.secondary} 
+                            name="最高SPIN"
+                            dot={true}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -429,8 +503,8 @@ export default function AnalysisPage() {
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={calculateBest()}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
+                          <XAxis dataKey="name" stroke="#666" />
+                          <YAxis stroke="#666" />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
                           <Bar dataKey="bestSpeed" fill={COLORS.primary} name="最高球速" />
@@ -455,13 +529,37 @@ export default function AnalysisPage() {
                         <ResponsiveContainer width="100%" height={300}>
                           <LineChart data={individualData}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis yAxisId="left" orientation="left" stroke={COLORS.primary} />
-                            <YAxis yAxisId="right" orientation="right" stroke={COLORS.secondary} />
+                            <XAxis dataKey="date" stroke="#666" />
+                            <YAxis 
+                              yAxisId="speed"
+                              orientation="left"
+                              stroke={COLORS.primary}
+                              domain={['auto', 'auto']}
+                            />
+                            <YAxis 
+                              yAxisId="spin"
+                              orientation="right"
+                              stroke={COLORS.secondary}
+                              domain={['auto', 'auto']}
+                            />
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
-                            <Line yAxisId="left" type="monotone" dataKey="speed" stroke={COLORS.primary} name="球速" />
-                            <Line yAxisId="right" type="monotone" dataKey="spin" stroke={COLORS.secondary} name="SPIN" />
+                            <Line 
+                              yAxisId="speed"
+                              type="monotone" 
+                              dataKey="speed" 
+                              stroke={COLORS.primary} 
+                              name="球速"
+                              dot={true}
+                            />
+                            <Line 
+                              yAxisId="spin"
+                              type="monotone" 
+                              dataKey="spin" 
+                              stroke={COLORS.secondary} 
+                              name="SPIN"
+                              dot={true}
+                            />
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
