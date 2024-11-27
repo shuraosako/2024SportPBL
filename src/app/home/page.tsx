@@ -197,7 +197,7 @@ export default function Home() {
           <div className="Selection">
             <Link href="/home">Home</Link>
             <div className="kai"></div>
-            <Link href="">Analysis</Link>
+            <Link href="/analysis">Analysis</Link>
             <div className="kai"></div>
             <Link href="/profile">Profile</Link>
             <div className="kai"></div>
