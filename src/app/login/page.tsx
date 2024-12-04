@@ -19,11 +19,17 @@ const firebaseConfig = {
   appId: "1:182306703534:web:86b8757669edf89f24453f",
   measurementId: "G-FYNN6VTDMJ",
 };
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-const auth = getAuth();
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Export Firebase instances
+export { db, storage };
+
+// Login Component
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");

@@ -1,4 +1,5 @@
 "use client";
+// change
 
 import { useState, useEffect } from "react";
 import "./home.css";
@@ -165,8 +166,16 @@ export default function Home() {
   return (
     <>
       <header>
+<<<<<<< HEAD
         <div className="header-container">
           <div className="logo">SportsPBL</div>
+=======
+        <ul className="header-container">
+        <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            &#9776;
+          </li>
+          <li className="logo">SportsPBL</li>
+>>>>>>> main
           <div className="header-right">
             <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               &#9776;
@@ -189,6 +198,9 @@ export default function Home() {
                 </div>
               )}
             </li>
+            <li><Link href="/login">LOGIN</Link></li>
+            <li><Link href="http://localhost:3000">TOP</Link></li>
+            <li><a href="#">Setting</a></li>
           </div>
         </div>
       </header>
