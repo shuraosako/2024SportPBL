@@ -1,6 +1,6 @@
 "use client";
 // change
-
+ 
 import { useState, useEffect } from "react";
 import "./home.css";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ import { db } from "../login/page";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-
+ 
 // Define the Player type with imageURL and creationDate
 type Player = {
   id: string;
@@ -23,7 +23,7 @@ type Player = {
   imageURL?: string;
   creationDate?: { seconds: number; nanoseconds: number }; // Firestore timestamp format
 };
-
+ 
 export default function Home() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,7 +38,7 @@ export default function Home() {
   const [isProfileOpen, setIsProfileOpen] = useState(false); // For profile pop-up
   const [profileImage, setProfileImage] = useState<string | null>(null); // User's profile image
   const [userName, setUserName] = useState<string | null>(null); // User's name or email
-
+ 
   // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -49,10 +49,10 @@ export default function Home() {
           id: doc.id,
           ...doc.data(),
         })) as Player[];
-
+ 
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
         const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
-
+ 
         setPlayers(playerList);
         setFilteredPlayers(playerList);
         setNames(uniqueNames);
@@ -61,29 +61,29 @@ export default function Home() {
         console.error("Error fetching players:", error);
       }
     };
-
+ 
     fetchPlayers();
   }, []);
-
+ 
   // Fetch the logged-in user's profile photo
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("User UID: ", user.uid); // Debugging
-  
+ 
         try {
           const userDocRef = doc(db, "users", user.uid); // Path to Firestore document
           const userDoc = await getDoc(userDocRef);
-  
+ 
           if (userDoc.exists()) {
             const data = userDoc.data();
             console.log("User Document Data: ", data);
-  
+ 
             // Fetch and set the username if available, fallback to email otherwise
-            const username = data?.username || user.email; 
+            const username = data?.username || user.email;
             setUserName(username);
-  
+ 
             // Fetch profile image
             const profileImageUrl = data?.profileImageUrl || null;
             setProfileImage(profileImageUrl);
@@ -100,25 +100,25 @@ export default function Home() {
       }
     });
   }, [router]);
-  
-
+ 
+ 
   const formatCreationDate = (timestamp?: { seconds: number; nanoseconds: number }) => {
     return timestamp
       ? new Date(timestamp.seconds * 1000).toLocaleDateString("en-GB") // Format as DD/MM/YYYY
       : "Unknown date";
   };
-
+ 
   const handleFilter = () => {
     let filtered = players;
-
+ 
     if (searchName) {
       filtered = filtered.filter((player) => player.name.toLowerCase().includes(searchName.toLowerCase()));
     }
-
+ 
     if (searchGrade) {
       filtered = filtered.filter((player) => player.grade === searchGrade);
     }
-
+ 
     if (selectedDate) {
       const selectedDateString = selectedDate.toLocaleDateString("en-GB");
       filtered = filtered.filter((player) => {
@@ -129,13 +129,13 @@ export default function Home() {
         return false;
       });
     }
-
+ 
     setFilteredPlayers(filtered);
   };
-
+ 
   const handleNameInputChange = (input: string) => {
     setSearchName(input);
-
+ 
     if (input) {
       const suggestions = names.filter((name) =>
         name.toLowerCase().includes(input.toLowerCase())
@@ -145,37 +145,29 @@ export default function Home() {
       setNameSuggestions([]);
     }
   };
-
+ 
   const handleNameSelect = (name: string) => {
     setSearchName(name);
     setNameSuggestions([]);
   };
-
+ 
   const handleAddNewPlayer = () => {
     router.push("/create_player");
   };
-
+ 
   const toggleProfilePopup = () => {
     setIsProfileOpen(!isProfileOpen);
   };
-
+ 
   const navigateToProfile = () => {
     router.push("/profile");
   };
-
+ 
   return (
     <>
       <header>
-<<<<<<< HEAD
         <div className="header-container">
           <div className="logo">SportsPBL</div>
-=======
-        <ul className="header-container">
-        <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </li>
-          <li className="logo">SportsPBL</li>
->>>>>>> main
           <div className="header-right">
             <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               &#9776;
@@ -205,7 +197,7 @@ export default function Home() {
         </div>
       </header>
       <div className="header-underline"></div>
-
+ 
       <div className="main-content">
         <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
           <div className="Selection">
@@ -220,7 +212,7 @@ export default function Home() {
             <Link href="">Rapsodo</Link>
           </div>
         </div>
-
+ 
         <div className="RightContenthome">
           {/* Filters */}
           <div className="dropdown-container">
@@ -231,7 +223,7 @@ export default function Home() {
               placeholderText="Select a date"
               className="dropdown-item"
             />
-
+ 
             <div className="name-autocomplete">
               <input
                 type="text"
@@ -250,7 +242,7 @@ export default function Home() {
                 </ul>
               )}
             </div>
-
+ 
             <select
               value={searchGrade}
               onChange={(e) => setSearchGrade(e.target.value)}
@@ -263,11 +255,11 @@ export default function Home() {
                 </option>
               ))}
             </select>
-
+ 
             <button onClick={handleFilter}>Filter</button>
             <button onClick={handleAddNewPlayer}>+ New Player</button>
           </div>
-
+ 
           {/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
