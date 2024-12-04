@@ -92,7 +92,7 @@ export default function Login() {
 
       <div className="newunder">
         <div className="new">
-          <div className="profile-upload" style={{ textAlign: 'center', margin: '20px 0' }}>
+          <div className="profile-upload" style={{ textAlign: 'center', margin: '10px 0' }}>
             <input 
               type="file" 
               accept="image/*" 
