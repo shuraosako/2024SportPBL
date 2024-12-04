@@ -69,8 +69,7 @@ export default function Home() {
     const auth = getAuth();
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserName(user.email); // Assuming email is used as the username
-        console.log("User UID: ", user.uid); // Log the UID for debugging
+        console.log("User UID: ", user.uid); // Debugging
   
         try {
           const userDocRef = doc(db, "users", user.uid); // Path to Firestore document
@@ -78,21 +77,25 @@ export default function Home() {
   
           if (userDoc.exists()) {
             const data = userDoc.data();
-            console.log("User Document Data: ", data); // Log the entire user document
+            console.log("User Document Data: ", data);
   
-            // Fetch the correct field: profileImageUrl
-            const profileImageUrl = data?.profileImageUrl || null; // Use profileImageUrl (with lowercase 'u')
-            console.log("Fetched Profile Image URL: ", profileImageUrl); // Log for debugging
+            // Fetch and set the username if available, fallback to email otherwise
+            const username = data?.username || user.email; 
+            setUserName(username);
   
-            setProfileImage(profileImageUrl); // Set the profile photo URL from Firestore
+            // Fetch profile image
+            const profileImageUrl = data?.profileImageUrl || null;
+            setProfileImage(profileImageUrl);
           } else {
             console.log("User document does not exist.");
+            setUserName(user.email); // Fallback to email
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
+          setUserName(user.email); // Fallback to email
         }
       } else {
-        router.push("/login"); // Redirect to login if not logged in
+        router.push("/login"); // Redirect to login if not authenticated
       }
     });
   }, [router]);
@@ -162,19 +165,22 @@ export default function Home() {
   return (
     <>
       <header>
-        <ul className="header-container">
-          <li className="logo">SportsPBL</li>
-          <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </li>
+        <div className="header-container">
+          <div className="logo">SportsPBL</div>
           <div className="header-right">
-            {/* Profile Photo */}
+            <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              &#9776;
+            </li>
+            {/* Profile Section */}
             <li className="profile-section" onClick={toggleProfilePopup}>
-              <img
-                src={profileImage || "/default-profile.png"} // Default profile image if not available
-                alt="Profile"
-                className="profile-image"
-              />
+              <div className="profile-info">
+                <img
+                  src={profileImage || "/default-profile.png"} // Default profile image if not available
+                  alt="Profile"
+                  className="profile-image"
+                />
+                <span className="username">{userName || "Guest"}</span> {/* Show username */}
+              </div>
               {isProfileOpen && (
                 <div className="profile-popup">
                   <p>{userName}</p>
@@ -184,7 +190,7 @@ export default function Home() {
               )}
             </li>
           </div>
-        </ul>
+        </div>
       </header>
       <div className="header-underline"></div>
 
@@ -193,7 +199,7 @@ export default function Home() {
           <div className="Selection">
             <Link href="/home">Home</Link>
             <div className="kai"></div>
-            <Link href="">Analysis</Link>
+            <Link href="/analysis">Analysis</Link>
             <div className="kai"></div>
             <Link href="/profile">Profile</Link>
             <div className="kai"></div>
