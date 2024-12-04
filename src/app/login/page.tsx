@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -34,63 +34,160 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPhoneSignIn, setShowPhoneSignIn] = useState(false); // State to toggle views
 
   const handleLoginClick = async () => {
     setError("");
+    setIsLoading(true);
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      if (!showPhoneSignIn) {
+        // Email login
+        await signInWithEmailAndPassword(auth, email, password);
+        router.push("/home");
+      } else {
+        // Phone login
+        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: (response: any) => {
+            console.log('reCAPTCHA solved');
+          },
+          'expired-callback': () => {
+            console.warn('reCAPTCHA expired');
+          },
+        });
+        await recaptchaVerifier.render();
+        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+        setVerificationId(confirmationResult.verificationId);
+        alert("OTP sent to your phone number.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Failed to log in. Please check your credentials or try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtpClick = async () => {
+    if (!verificationId || !otp) {
+      alert("Please enter the OTP.");
+      return;
+    }
+
+    try {
+      const credential = PhoneAuthProvider.credential(verificationId, otp);
+      alert("Phone number verified successfully.");
       router.push("/home");
     } catch (err) {
-      setError("Failed to log in. Please check your credentials.");
-      console.error("Login error:", err);
+      console.error("OTP verification error:", err);
+      setError("Failed to verify OTP. Please try again.");
     }
   };
 
   return (
     <>
       <header>
-        <ul>
-          <li className="logo">SportsPBL</li>
-          <div className="header-right">
+        <div className="logo">SportsPBL</div>
+        <div className="header-right">
+          <ul>
             <li><Link href="/login">LOGIN</Link></li>
             <li><Link href="http://localhost:3000">TOP</Link></li>
             <li><a href="#">Settings</a></li>
-          </div>
-        </ul>
+          </ul>
+        </div>
       </header>
 
       <div className="logunder">
-        <div className="logframe">
-          <div className="log">
-            <div className="inputfield">
-              <label className="mailaddress">Email Address</label>
-              <input
-                type="email"
-                id="mailaddress"
-                name="mailaddress"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="inputfield">
-              <label className="pass">Password</label>
-              <input
-                type="password"
-                id="pass"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && <div className="error">{error}</div>}
-            <div className="kai"></div>
-            <div className="login-button">
-              <button type="button" onClick={handleLoginClick}>Login</button>
-            </div>
+        <div className="log">
+          {/* Toggle between email and phone sign-in */}
+          <div className="sign-in-toggle">
+            <button type="button" onClick={() => setShowPhoneSignIn(false)}>
+              Email Sign-In
+            </button>
+            <button type="button" onClick={() => setShowPhoneSignIn(true)}>
+              Phone Sign-In
+            </button>
           </div>
+
+          {/* Email sign-in form */}
+          {!showPhoneSignIn && (
+            <>
+              <div className="inputfield">
+                <label className="mailaddress">Email Address</label>
+                <input
+                  type="email"
+                  id="mailaddress"
+                  name="mailaddress"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="inputfield">
+                <label className="pass">Password</label>
+                <input
+                  type="password"
+                  id="pass"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Phone sign-in form */}
+          {showPhoneSignIn && (
+            <>
+              <div className="inputfield">
+                <label className="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="+1234567890"
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {error && <div className="error">{error}</div>}
+
+          {/* Login Button */}
+          <div className="login-button">
+            <button type="button" onClick={handleLoginClick} disabled={isLoading}>
+              Login
+            </button>
+          </div>
+
+          {/* OTP Verification */}
+          {verificationId && (
+            <div className="inputfield">
+              <label className="otp">OTP</label>
+              <input
+                type="text"
+                id="otp"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
+                required
+              />
+              <button type="button" onClick={handleVerifyOtpClick} disabled={isLoading}>
+                Verify OTP
+              </button>
+            </div>
+          )}
+
           <div className="kai"></div>
           <div className="addition">
             <Link href="">＞Forgot your Password?<br /></Link>
@@ -102,118 +199,8 @@ export default function Login() {
         <div className="last-line"></div>
       </div>
 
-      <style jsx>{`
-        header {
-          background-color: #fff;
-          padding: 1rem;
-          border-bottom: 1px solid #eee;
-        }
-
-        ul {
-          list-style: none;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0;
-          padding: 0;
-        }
-
-        .logo {
-          font-weight: bold;
-          font-size: 1.2rem;
-        }
-
-        .header-right {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .logunder {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: calc(100vh - 70px);
-          background-color: #f5f5f5;
-        }
-
-        .logframe {
-          background: white;
-          padding: 2rem;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          width: 100%;
-          max-width: 400px;
-        }
-
-        .inputfield {
-          margin-bottom: 1.5rem;
-        }
-
-        label {
-          display: block;
-          margin-bottom: 0.5rem;
-          font-weight: 500;
-        }
-
-        input {
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 1rem;
-        }
-
-        .error {
-          color: red;
-          margin-bottom: 1rem;
-          font-size: 0.875rem;
-        }
-
-        .kai {
-          height: 1rem;
-        }
-
-        .login-button button {
-          width: 100%;
-          padding: 0.75rem;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          font-size: 1rem;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-
-        .login-button button:hover {
-          background-color: #0056b3;
-        }
-
-        .addition {
-          margin-top: 1.5rem;
-          text-align: center;
-        }
-
-        .addition a {
-          color: #007bff;
-          text-decoration: none;
-          font-size: 0.875rem;
-          display: block;
-          margin-bottom: 0.5rem;
-        }
-
-        .addition a:hover {
-          text-decoration: underline;
-        }
-
-        .last {
-          margin-top: 2rem;
-        }
-
-        .last-line {
-          border-top: 1px solid #eee;
-        }
-      `}</style>
+      {/* ReCAPTCHA container */}
+      <div id="recaptcha-container"></div>
     </>
   );
 }

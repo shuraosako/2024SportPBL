@@ -1,93 +1,69 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/*top*/
-header{
+
+/* Top header */
+header {
+  display: flex;
+  justify-content: space-between; /* Space between logo and header-right */
+  align-items: center; /* Align items vertically */
   background-color: #fdfdfd;
   height: 60px;
   width: 100vw;
-  display: flex;
-  align-items: center;
-  position: fixed;
-  z-index: 10;
   padding: 10px 20px;
   box-shadow: 0 4px 2px -2px gray;
   border-bottom: 15px solid #ABDFDF;
-
-
+  position: fixed;
+  z-index: 10;
 }
 
-.fit-ex{
-  display: flex;
-  margin: 0 0 0 20px;
-}
-.fit-ex .top-fit{
-  width: 60vw; 
-  margin: 0;
-  padding: 0;
-  margin: 20px 0 0 0;
-  overflow: hidden;
-  position: relative;
-}
-.fit-ex .ex1{
-  padding: 0;
-  margin: 0 30px 30px 30px; 
-}
-.fit-ex .title1{
-  margin: 0;
-  padding: 0;
-  font-weight: bold;
-  font-size: 18px;
-}
-.fit-ex .text1{
-  width: 40vw; 
-  margin: 10px 0 0;
-  padding: 0;
-  font-size:1.7vw;
-}
-.rap-ex{
-  display: flex;
-  margin: 0 0 0 20px;
-}
-.rap-ex .rap-fit{
-  width: 60vw; 
-  margin: 0;
-  padding: 0;
-  margin: 20px 0 0 0;
-  overflow: hidden;
-  position: relative;
-}
-.rap-ex .ex2{
-  padding: 0;
-  margin: 0 30px 30px 30px; 
-}
-.rap-ex .title2{
-  margin: 0;
-  padding: 0;
-  font-weight: bold;
-  font-size: 18px;
-}
-.rap-ex .text2{
-  width: 40vw; 
-  margin: 10px 0px 0 0;
-  padding: 0;
-  font-size:1.7vw;
-}
-header .logo{
+.logo {
   font-size: 20px;
-  margin-left: 20px;
   font-weight: bold;
 }
-.header-underline{
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-right ul {
+  display: flex; /* Align list items horizontally */
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  padding: 0;
+}
+
+.header-right li {
+  margin-left: 15px; /* Space between items */
+  padding: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.header-right li a {
+  text-decoration: none;
+  color: black; /* Adjust as needed */
+}
+
+.header-right li:hover {
+  background-color: #ABDFDF;
+}
+
+.header-underline {
   height: 5px;
   width: 100vw;
-  background-color: #868686;  
+  background-color: #868686;
 }
-.ground-underline{
+
+.ground-underline {
   height: 80px;
   width: 100vw;
   background-color: #ffffff;
 }
+<<<<<<< HEAD
+=======
 .top-min {
   width: 100vw; 
   height: auto;
@@ -120,8 +96,9 @@ header ul{
   height: 80px;
   background-color: #c1bdbd;
 }
+>>>>>>> main
 
-/*login*/
+/* Login page */
 .logunder {
   height: 100vh;
   width: 100vw;
@@ -142,9 +119,18 @@ header ul{
   
 }
 
-
-
 .log {
+<<<<<<< HEAD
+  width: 50%;
+  height: auto;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+=======
   width: 40vw;
   height: 32vw; /* Change this to auto for flexibility */
   border-radius: 20px;
@@ -159,41 +145,71 @@ header ul{
   margin-top: 15%;
   margin-left: 28vw;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+>>>>>>> main
 }
-.inputfield{
+
+.inputfield {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   text-align: center;
   
 }
 
 label {
-  margin: 10px 0; /* Add margin for spacing */
-  font-size: 1vw; /* Increase font size for visibility */
+  margin-bottom: 10px;
+  font-size: 1rem;
   color: black;
   
+}
+
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="text"] {
+  width: 100%;
+  height: 3vw;
+  font-size: 1.8vw;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+input[type="text"]:focus {
+  border-color: #41bbd0;
 }
 
 .kai {
   margin-bottom: 5vw;
 }
 
+<<<<<<< HEAD
+=======
 
 .addition {
   font-size: 1.2vw;
   margin-top: 2vw; 
   margin-left: 41vw; 
 }
+>>>>>>> main
 .login-button {
   background-color: #5f989c;
   color: white;
   border-radius: 5px;
-  padding: 8px 15px; 
-  font-size: 1vw; 
+  padding: 8px 15px;
+  font-size: 1vw;
   cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s;
-  width: 50%; 
-  height: 4vw; 
-  margin-top: 2vw; 
+  width: 50%;
+  height: 4vw;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -204,72 +220,77 @@ label {
   border-color: #41bbd0;
 }
 
-input[type="logintext"],
-input[type="loginpassword"] {
-  height: 3vw;  
-  width: 100%;  
-  font-size: 1.8vw;
-  align-content: center; 
+.addition {
+  font-size: 1.2vw;
+  margin-top: 2vw;
+  text-align: center;
 }
 
-/*new account*/
-.newunder{
+/* New account */
+.newunder {
   height: 100vw;
   width: 100vw;
-  background:#6FAAAA;
-  display:flex;
+  background: #6FAAAA;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.new{
+.new {
   width: 50%;
-  height: 60%; 
+  height: 60%;
   border-radius: 20px;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 2vw;
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; /* Center align children horizontally */
-  
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 input[type="text"],
 input[type="password"],
+<<<<<<< HEAD
+input[type="email"] {
+  width: 100%;
+  height: 3vw;
+  font-size: 1.2vw;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+=======
 input[type='email']{
   height:3vw;
   width:100%;
   font-size: 8px;
   background:#c3d1d9;
   border-radius: 5px;
+>>>>>>> main
 }
-/*home*/
 
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+  border-color: #41bbd0;
+}
+
+/* Home page */
 .header-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  list-style-type: none;
   padding: 10px 20px;
   margin: 0;
   box-sizing: border-box;
-}
-
-.logo {
-  flex: 1;
-  font-size: 24px;
 }
 
 .hamburger {
   cursor: pointer;
   font-size: 24px;
   padding: 10px;
-}
-
-.header-right {
-  display: flex;
-  gap: 20px;
 }
 
 .main-content {
@@ -300,7 +321,7 @@ input[type='email']{
 .RightContenthome {
   flex: 1;
   background-color: #fafafa;
-  padding: 40px 0px; /* Padding around the RightContent */
+  padding: 40px 0px;
 }
 
 .dropdown-container {
@@ -308,44 +329,43 @@ input[type='email']{
   justify-content: space-evenly;
   align-items: center;
   margin-bottom: 20px;
-  background-color: #f0f8ff; /* Light background for better contrast */
-  padding: 15px;            /* Add padding around the contents */
-  border-radius: 8px;       /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  background-color: #f0f8ff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.dropdown-item, .search-input {
+.dropdown-item,
+.search-input {
   padding: 8px;
   margin-right: 10px;
-  background-color: #ffffff; /* White background for form elements */
-  border: 1px solid #ccc;    /* Light border for better definition */
+  background-color: #ffffff;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  color: #333;               /* Dark text for readability */
+  color: #333;
 }
 
 .search-input {
-  width: 150px;              /* Set width for search input */
+  width: 150px;
 }
 
-
-
 button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+  background-color: #0056b3;
 }
 
 .date-picker {
-  height: 40px; /* Adjust height for the date picker */
-  font-size: 14px; /* Font size for the date picker */
-  width: 100%; /* Full width to match dropdown items */
+  height: 40px;
+  font-size: 14px;
+  width: 100%;
 }
 
-.CreatePlayer{               
-  padding: 20px;              
-  width: 200px;                
-  position: absolute;          
-  right: 0;                    
-  top: 20px;                   
-  border-radius: 8px;          
+.CreatePlayer {
+  padding: 20px;
+  width: 200px;
+  position: absolute;
+  right: 0;
+  top: 20px;
+  border-radius: 8px;
 }
 
 .header-right li {
