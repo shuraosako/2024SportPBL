@@ -6,16 +6,15 @@ export default function Homepage() {
     
     <>
     <header>
-      <ul>
-        <li className="logo">SportsPBL</li>
+        <div className="logo">SportsPBL</div>
         <div className="header-right">
-          <li><Link href="/login">LOGIN</Link></li>
-          <li><a href="">TOP</a></li>
-          <li><a href="#">setting</a></li>
+          <ul>
+            <li><Link href="/login">LOGIN</Link></li>
+            <li><Link href="http://localhost:3000">TOP</Link></li>
+            <li><a href="#">Settings</a></li>
+          </ul>
         </div>
-      </ul>
-      
-    </header>
+      </header>
     
 
     

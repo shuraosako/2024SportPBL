@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -19,76 +19,175 @@ const firebaseConfig = {
   appId: "1:182306703534:web:86b8757669edf89f24453f",
   measurementId: "G-FYNN6VTDMJ",
 };
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-const auth = getAuth();
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Export Firebase instances
+export { db, storage };
+
+// Login Component
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState(""); // State for email input
-  const [password, setPassword] = useState(""); // State for password input
-  const [error, setError] = useState(""); // State for error messages
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPhoneSignIn, setShowPhoneSignIn] = useState(false); // State to toggle views
 
   const handleLoginClick = async () => {
-    setError(""); // Clear previous errors
+    setError("");
+    setIsLoading(true);
+
     try {
-      // Authenticate user with Firebase
-      await signInWithEmailAndPassword(auth, email, password);
-      // Redirect to the homepage after successful login
+      if (!showPhoneSignIn) {
+        // Email login
+        await signInWithEmailAndPassword(auth, email, password);
+        router.push("/home");
+      } else {
+        // Phone login
+        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: (response: any) => {
+            console.log('reCAPTCHA solved');
+          },
+          'expired-callback': () => {
+            console.warn('reCAPTCHA expired');
+          },
+        });
+        await recaptchaVerifier.render();
+        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+        setVerificationId(confirmationResult.verificationId);
+        alert("OTP sent to your phone number.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Failed to log in. Please check your credentials or try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtpClick = async () => {
+    if (!verificationId || !otp) {
+      alert("Please enter the OTP.");
+      return;
+    }
+
+    try {
+      const credential = PhoneAuthProvider.credential(verificationId, otp);
+      alert("Phone number verified successfully.");
       router.push("/home");
     } catch (err) {
-      // Show error message if login fails
-      setError("Failed to log in. Please check your credentials.");
-      console.error("Login error:", err);
+      console.error("OTP verification error:", err);
+      setError("Failed to verify OTP. Please try again.");
     }
   };
 
   return (
     <>
       <header>
-        <ul>
-          <li className="logo">SportsPBL</li>
-          <div className="header-right">
+        <div className="logo">SportsPBL</div>
+        <div className="header-right">
+          <ul>
             <li><Link href="/login">LOGIN</Link></li>
             <li><Link href="http://localhost:3000">TOP</Link></li>
             <li><a href="#">Settings</a></li>
-          </div>
-        </ul>
+          </ul>
+        </div>
       </header>
 
       <div className="logunder">
-        <div className="logframe">
         <div className="log">
-          <div className="inputfield">
-          
-            <label className="mailaddress">Email Address</label>
-            <input
-              type="email"
-              id="mailaddress"
-              name="mailaddress"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)} // Update email state on input change
-              required
-            />
+          {/* Toggle between email and phone sign-in */}
+          <div className="sign-in-toggle">
+            <button type="button" onClick={() => setShowPhoneSignIn(false)}>
+              Email Sign-In
+            </button>
+            <button type="button" onClick={() => setShowPhoneSignIn(true)}>
+              Phone Sign-In
+            </button>
           </div>
-          <div className="inputfield">
-            <label className="pass">Password</label>
-            <input
-              type="password"
-              id="pass"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} // Update password state on input change
-              required
-            />
-          </div>
-          {error && <div className="error">{error}</div>} {/* Display error message */}
-          <div className="kai"></div>
+
+          {/* Email sign-in form */}
+          {!showPhoneSignIn && (
+            <>
+              <div className="inputfield">
+                <label className="mailaddress">Email Address</label>
+                <input
+                  type="email"
+                  id="mailaddress"
+                  name="mailaddress"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="inputfield">
+                <label className="pass">Password</label>
+                <input
+                  type="password"
+                  id="pass"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Phone sign-in form */}
+          {showPhoneSignIn && (
+            <>
+              <div className="inputfield">
+                <label className="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="+1234567890"
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {error && <div className="error">{error}</div>}
+
+          {/* Login Button */}
           <div className="login-button">
-            <button type="button" onClick={handleLoginClick}>Login</button> {/* Redirect only after click */}
+            <button type="button" onClick={handleLoginClick} disabled={isLoading}>
+              Login
+            </button>
           </div>
-          </div>
+
+          {/* OTP Verification */}
+          {verificationId && (
+            <div className="inputfield">
+              <label className="otp">OTP</label>
+              <input
+                type="text"
+                id="otp"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
+                required
+              />
+              <button type="button" onClick={handleVerifyOtpClick} disabled={isLoading}>
+                Verify OTP
+              </button>
+            </div>
+          )}
+
           <div className="kai"></div>
           <div className="addition">
             <Link href="">＞Forgot your Password?<br /></Link>
@@ -99,6 +198,9 @@ export default function Login() {
       <div className="last">
         <div className="last-line"></div>
       </div>
+
+      {/* ReCAPTCHA container */}
+      <div id="recaptcha-container"></div>
     </>
   );
 }
