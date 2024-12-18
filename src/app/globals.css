@@ -62,38 +62,6 @@ header {
   width: 100vw;
   background-color: #ffffff;
 }
-.top-min {
-  width: 100vw; 
-  height: auto;
-  overflow: hidden; 
-}
- .rap-fit {
-  width: 40vw;
-  margin-left: 5vw;
-  object-fit:cover;  
-}
-header ul{
-  width: 100vw;
-  display: flex;
-  justify-content: space-between;
-}
-.header-right{
-  display: flex;
-  margin-right: 10px;
-}
-.header-right li{
-  margin-left: 10px;
-  padding: 5px;
-  font-weight:500;
-}
-.header-right li:hover{
-  background-color: #ABDFDF;
-}
-.last-line{
-  width: 100vw;
-  height: 80px;
-  background-color: #c1bdbd;
-}
 
 /* Login page */
 .logunder {
@@ -105,6 +73,9 @@ header ul{
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  
 }
 
 .logframe{
@@ -126,20 +97,6 @@ header ul{
   flex-direction: column;
   align-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 40vw;
-  height: 32vw; /* Change this to auto for flexibility */
-  border-radius: 20px;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 2.5vw;
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; /* Center align children horizontally */
-  background-color: #ffffff;
-  border: 1.8px solid #96acb0;
-  margin-top: 15%;
-  margin-left: 28vw;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .inputfield {
@@ -185,12 +142,6 @@ input[type="text"]:focus {
   margin-bottom: 5vw;
 }
 
-
-.addition {
-  font-size: 1.2vw;
-  margin-top: 2vw; 
-  margin-left: 41vw; 
-}
 .login-button {
   background-color: #5f989c;
   color: white;
@@ -261,12 +212,6 @@ input[type="email"] {
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.3s;
-input[type='email']{
-  height:3vw;
-  width:100%;
-  font-size: 8px;
-  background:#c3d1d9;
-  border-radius: 5px;
 }
 
 input[type="text"]:focus,
