@@ -166,16 +166,8 @@ export default function Home() {
   return (
     <>
       <header>
-<<<<<<< HEAD
         <div className="header-container">
           <div className="logo">SportsPBL</div>
-=======
-        <ul className="header-container">
-        <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </li>
-          <li className="logo">SportsPBL</li>
->>>>>>> main
           <div className="header-right">
             <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               &#9776;

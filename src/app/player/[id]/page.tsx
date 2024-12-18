@@ -65,10 +65,7 @@ export default function PlayerPage() {
       reader.onload = (e) => {
         const data = e.target?.result;
         if (file.type === "text/csv") {
-<<<<<<< HEAD
           // Parse CSV file with a specified encoding
-=======
->>>>>>> main
           Papa.parse(data as string, {
             header: true,
             encoding: "UTF-8", // Explicitly set the encoding to UTF-8

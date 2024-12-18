@@ -23,6 +23,51 @@ const COLORS = {
   lightText: "#6b7280",
 };
 
+const mapRawDataToPlayerData = (rawData: any): PlayerData => {
+  console.log('Mapping Raw Data:', rawData); // Debugging step
+
+  const parsedSpeed = parseFloat(rawData["速度(kph)"]?.trim());
+  const parsedSpin = parseInt(rawData["SPIN"]?.trim(), 10);
+
+  // Log issues with parsing
+  if (isNaN(parsedSpeed)) {
+    console.error('Invalid Speed Detected:', rawData["速度(kph)"]);
+  }
+  if (isNaN(parsedSpin)) {
+    console.error('Invalid Spin Detected:', rawData["SPIN"]);
+  }
+
+  return {
+    id: rawData.id || "unknown-id",
+    documentId: rawData.documentId || undefined,
+    date: rawData["日付"] || "unknown-date",
+    speed: isNaN(parsedSpeed) ? 0 : parsedSpeed, // Fallback to 0
+    spin: isNaN(parsedSpin) ? 0 : parsedSpin,   // Fallback to 0
+    trueSpin: parseInt(rawData["TRUE SPIN"]?.trim(), 10) || 0,
+    spinEff: parseFloat(rawData["SPIN EFF."]?.replace("%", "").trim()) || 0,
+    spinDirection: convertSpinDirection(rawData["SPIN DIRECTION"]),
+    verticalMovement: parseFloat(rawData["線の変化量(cm)"]?.trim()) || 0,
+    horizontalMovement: parseFloat(rawData["軸の変化量(cm)"]?.trim()) || 0,
+    strike: rawData["ストライク"] === "はい" ? 1 : 0,
+    releasePoint: parseFloat(rawData["リリースポイントの高さ(m)"]?.trim()) || 0,
+    absorption: rawData.absorption || "unknown",
+  };
+};
+
+const convertSpinDirection = (spinDirection: string): number => {
+  if (!spinDirection.includes("h") || !spinDirection.includes("m")) {
+    return 0; // Default fallback
+  }
+  const [hours, minutes] = spinDirection
+    .replace("h", "")
+    .replace("m", "")
+    .split(":")
+    .map((val) => parseInt(val));
+  return hours * 30 + minutes * 0.5; // Convert hours and minutes to degrees
+};
+
+
+
 // データ型の定義
 type PlayerData = {
   id: string;
@@ -53,7 +98,6 @@ export default function AnalysisPage() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
-  
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showAllPeriod, setShowAllPeriod] = useState(true);
@@ -63,6 +107,23 @@ export default function AnalysisPage() {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [playerData, setPlayerData] = useState<PlayerData[]>([]);
   const [currentTab, setCurrentTab] = useState<"average" | "best" | "individual">("average");
+
+
+  useEffect(() => {
+    const fetchRawPlayerData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "players"));
+        const normalizedData = querySnapshot.docs.map((doc) =>
+          mapRawDataToPlayerData(doc.data())
+        );
+        setPlayerData(normalizedData); // Replace this with your existing setter or state logic
+      } catch (error) {
+        console.error("Error fetching player data:", error);
+      }
+    };
+  
+    fetchRawPlayerData();
+  }, []);
 
   // プロフィール情報取得
   useEffect(() => {
@@ -107,60 +168,66 @@ export default function AnalysisPage() {
   useEffect(() => {
     const fetchPlayerData = async () => {
       if (selectedPlayers.length === 0 && !showAllPeriod) return;
-
+  
       try {
         let data: PlayerData[] = [];
         const targetPlayers = selectedPlayers.length ? selectedPlayers : players.map(p => p.id);
-
+  
         for (const playerId of targetPlayers) {
-          const querySnapshot = await getDocs(collection(db, `players/${playerId}/csv`));
-          const playerData = querySnapshot.docs.map(doc => ({
-            ...doc.data(),
-            id: playerId,
-            documentId: doc.id
-          })) as PlayerData[];
+          const csvCollectionRef = collection(db, `players/${playerId}/csvData`);
+          const querySnapshot = await getDocs(csvCollectionRef);
+  
+          const playerData = querySnapshot.docs
+            .map(doc => {
+              const rawData = doc.data();
+              // Skip invalid documents
+              if (rawData["速度(kph)"] === "-" || rawData["SPIN"] === "-") {
+                console.log(`Skipping document with invalid data: ${doc.id}`);
+                return null;
+              }
+              // Map raw data to PlayerData
+              return mapRawDataToPlayerData({
+                ...rawData,
+                id: playerId,
+                documentId: doc.id,
+              });
+            })
+            .filter(item => item !== null) as PlayerData[]; // Filter out null values
+  
           data = [...data, ...playerData];
         }
-
-        // 日付フィルター
+  
+        // Filter by date range if required
         if (!showAllPeriod && startDate && endDate) {
           data = data.filter(item => {
             const itemDate = new Date(item.date);
             return itemDate >= startDate && itemDate <= endDate;
           });
         }
-
+  
+        // Sort data
         data.sort((a, b) => {
-          const getValueSafely = (item: PlayerData, key: SortableField) => {
-            switch(key) {
-              case 'date':
-                return item.date;
-              case 'speed':
-                return item.speed;
-              case 'spin':
-                return item.spin;
-              default:
-                return 0;
-            }
+          const getValue = (item: PlayerData, key: SortableField) => {
+            if (key === 'date') return new Date(item.date).getTime();
+            return key === 'speed' ? item.speed : item.spin;
           };
-        
-          const aValue = getValueSafely(a, selectedItem);
-          const bValue = getValueSafely(b, selectedItem);
-        
-          return sortOrder === "asc" 
-            ? (aValue < bValue ? -1 : 1)
-            : (aValue > bValue ? -1 : 1);
+  
+          const aValue = getValue(a, selectedItem);
+          const bValue = getValue(b, selectedItem);
+  
+          return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
         });
-
-        console.log('Fetched Data:', data); // デバッグ用
-        setPlayerData(data);
+  
+        setPlayerData(data); // Update state with processed data
       } catch (error) {
         console.error("Error fetching player data:", error);
       }
     };
-
+  
     fetchPlayerData();
-  }, [selectedPlayers, startDate, endDate, showAllPeriod, selectedItem, sortOrder, players]);
+  }, [selectedPlayers, showAllPeriod, startDate, endDate, selectedItem, sortOrder, players]);
+  
+
   const toggleProfilePopup = () => {
     setIsProfileOpen(!isProfileOpen);
   };
@@ -219,21 +286,45 @@ export default function AnalysisPage() {
     return best;
   };
 
+  
+  const fetchPlayerData = async () => {
+    // Fetch data from Firestore or wherever your player data is stored
+    const querySnapshot = await getDocs(collection(db, "players"));
+    const fetchedData: PlayerData[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      // Assuming the data contains "date", "速度(kph)", and "SPIN"
+      fetchedData.push(mapRawDataToPlayerData(data));
+    });
+    setPlayerData(fetchedData);
+  };
   // 個人グラフデータの処理
   const getIndividualData = (playerId: string) => {
-    const data = playerData
+    const filteredData = playerData
       .filter(data => data.id === playerId)
-      .map(data => ({
-        date: data.date,
-        speed: Number(data.speed),
-        spin: Number(data.spin),
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    
-    console.log('Individual Data:', data); // デバッグ用
-    return data;
+      .map(data => {
+        // Parse and validate the fields
+        const parsedSpeed = Number(data.speed);
+        const parsedSpin = Number(data.spin);
+        const parsedDate = new Date(data.date);
+
+        return {
+          date: parsedDate,
+          speed: isNaN(parsedSpeed) ? 0 : parsedSpeed,  // Ensure valid speed
+          spin: isNaN(parsedSpin) ? 0 : parsedSpin,    // Ensure valid spin
+        };
+      })
+      .filter(item => !isNaN(item.speed) && !isNaN(item.spin))  // Filter out invalid entries
+      .sort((a, b) => a.date.getTime() - b.date.getTime());  // Sort by date
+
+    console.log('Filtered Individual Data:', filteredData);
+    return filteredData;
   };
 
+  // Call the fetchPlayerData function when the component mounts
+  useEffect(() => { 
+    fetchPlayerData();
+  }, []);
   return (
     <>
       <header>
@@ -241,7 +332,7 @@ export default function AnalysisPage() {
           <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             &#9776;
           </li>
-          <li className="logo">SportsPBL</li>
+          <li className="logo"><Link href="/home"></Link>SportsPBL</li>
           <div className="header-right">
             <li className="profile-section" onClick={toggleProfilePopup}>
               <img
@@ -516,57 +607,42 @@ export default function AnalysisPage() {
                 </div>
               )}
 
-              {currentTab === "individual" && selectedPlayers.length > 0 && (
-                <div className="graph-section">
-                  <h3 className="graph-title">個人グラフ</h3>
-                  {selectedPlayers.map(playerId => {
-                    const playerName = players.find(p => p.id === playerId)?.name;
-                    const individualData = getIndividualData(playerId);
-                    
-                    return (
-                      <div key={playerId} className="individual-graph">
-                        <h4>{playerName}の推移</h4>
-                        <ResponsiveContainer width="100%" height={300}>
-                          <LineChart data={individualData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" stroke="#666" />
-                            <YAxis 
-                              yAxisId="speed"
-                              orientation="left"
-                              stroke={COLORS.primary}
-                              domain={['auto', 'auto']}
-                            />
-                            <YAxis 
-                              yAxisId="spin"
-                              orientation="right"
-                              stroke={COLORS.secondary}
-                              domain={['auto', 'auto']}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend />
-                            <Line 
-                              yAxisId="speed"
-                              type="monotone" 
-                              dataKey="speed" 
-                              stroke={COLORS.primary} 
-                              name="球速"
-                              dot={true}
-                            />
-                            <Line 
-                              yAxisId="spin"
-                              type="monotone" 
-                              dataKey="spin" 
-                              stroke={COLORS.secondary} 
-                              name="SPIN"
-                              dot={true}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                {currentTab === "individual" && selectedPlayers.length > 0 && (
+                  <div className="graph-section">
+                    <h3 className="graph-title">個人グラフ</h3>
+                    {selectedPlayers.map(playerId => {
+                      const playerName = players.find(p => p.id === playerId)?.name;
+                      const individualData = getIndividualData(playerId);
+                      
+                      return (
+                        <div key={playerId} className="individual-graph">
+                          <h4>{playerName} - Pitch Speed vs. Spin</h4>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={individualData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis 
+                                dataKey="speed" 
+                                label={{ value: 'Speed (kph)', position: 'insideBottomRight', offset: 0 }} 
+                                stroke={COLORS.primary} 
+                                type="number" // Ensure the type is set to "number"
+                                domain={['dataMin', 'dataMax']} // To dynamically adjust the domain
+                              />
+                              <YAxis 
+                                label={{ value: 'Spin', angle: -90, position: 'insideLeft' }} 
+                                stroke={COLORS.secondary} 
+                                type="number" // Ensure the type is set to "number"
+                                domain={['dataMin', 'dataMax']} // To dynamically adjust the domain
+                              />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Legend />
+                              <Line type="monotone" dataKey="spin" stroke={COLORS.secondary} name="Spin" dot={true} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
             </div>
           </div>
         </div>
