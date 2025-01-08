@@ -62,6 +62,39 @@ header {
   width: 100vw;
   background-color: #ffffff;
 }
+.fit-ex, .rap-ex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 20px 0;
+}
+
+.ex1, .ex2 {
+  flex: 1;
+  margin-right: 20px; 
+  font-size: 1.7vw;
+}
+
+.top-fit, .rap-fit {
+  flex: 1;
+}
+.title1{
+  font-size: 2vw;
+  font-weight: bold;
+  margin-left: 1vw;
+}
+.top-fit{
+  margin-top: 7vw;
+}
+.title2{
+  font-size: 2vw;
+  font-weight: bold;
+  margin-top: 5vw;
+  margin-left: 1vw;
+}
+.ex2{
+  margin-left: 1vw;
+}
 
 /* Login page */
 .logunder {
