@@ -62,7 +62,26 @@ header {
   width: 100vw;
   background-color: #ffffff;
 }
-
+.fit-ex{
+  display: flex;   
+}
+.ex1{
+  width: 50vw;
+  font-size: 1.9vw;
+}
+.top-fit{
+  width: 50vw;
+}
+.ex2{
+  width: 50vw;
+  font-size: 1.9vw;
+}
+.rap-ex{
+  display: flex;   
+}
+.rap-fit{
+  width: 50vw;  
+}
 /* Login page */
 .logunder {
   height: 100vh;
