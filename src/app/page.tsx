@@ -33,15 +33,22 @@ export default function Homepage() {
         <div className="ground-underline"></div>
         <div className="fit-ex"> 
         <div className="ex1">
-         <p className="title1">Information</p>
-         <p className="text1">Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna
- aliqua. Ut enim ad minim veniam, quis nostrud exercitation
- ullamco laboris nisi ut aliquip ex ea commodo consequat.
- Duis aute irure dolor in reprehenderit in voluptate velit esse
- cillum dolore eu fugiat nulla pariatur. Excepteur sint 
-occaecat cupidatat non proident, sunt in culpa qui officia
- deserunt mollit anim id est laborum.</p>
+         <p className="title1">野球部紹介</p>
+         <p className="text1">昭和40年4月に創部。
+現在加盟する、福岡六大学野球連盟には連盟発足当時(昭和47年)から加盟。
+優勝回数は春・秋季合わせ、13回を数える。
+
+平成24年3月、塩浜総合グラウンド・FITスタジアムが完成。
+本施設は鵜木前理事長が、
+「この野球道場の精神を“礼節を重んじる人格の陶治”と定める。」
+児童、生徒、学生が、挨拶を責び、以て、地域との交わりを深め、いっそう人間力を形成し成長することを願い、この地に総合グラウンドとして設立した。
+
+
+学生野球の最高峰である大学野球。
+本学硬式野球部は、最高のプレーだけでなく、向き合う姿勢・熱量などすべてにおいて「学生野球の頂点へ」を目指し、日々汗を流しています。
+グラウンドでの全力疾走・挨拶・礼節といった野球を通じた人間力向上、グラウンドだけでなく、社会で活躍するプレーヤーを目指します。
+
+FITの大学生らしい溌剌とした、グラウンドを全力疾走で駆け回る姿・球場全体を轟かせる最大発声で、観客の皆様に感動を与えられるよう精進致します。</p>
          </div>
         <div className="top-fit">
       <Image 
@@ -65,15 +72,9 @@ occaecat cupidatat non proident, sunt in culpa qui officia
         />
       </div>
       <div className="ex2">
-         <p className="title2">Information</p>
-         <p className="text2">Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna
- aliqua. Ut enim ad minim veniam, quis nostrud exercitation
- ullamco laboris nisi ut aliquip ex ea commodo consequat.
- Duis aute irure dolor in reprehenderit in voluptate velit esse
- cillum dolore eu fugiat nulla pariatur. Excepteur sint 
-occaecat cupidatat non proident, sunt in culpa qui officia
- deserunt mollit anim id est laborum.</p>
+         <p className="title2">Rapsodoとは</p>
+         <p className="text2">
+         ラプソードは、野球・ソフトボール・ゴルフの投球・打球をカメラとレーダーで計測・分析するデータトラッキング機器です。計測されるデータには、キャリー、飛距離、クラブスピード、ボールスピード、打出角度、打出方向、ミート率などが含まれています</p>
          </div>
       </div>
       </div>
