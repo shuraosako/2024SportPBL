@@ -4,32 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCoq3lwqjKG1Ja9OQMlmQyOsBFot_fEMXU",
-  authDomain: "sports-pbl.firebaseapp.com",
-  projectId: "sports-pbl",
-  storageBucket: "sports-pbl.appspot.com",
-  messagingSenderId: "182306703534",
-  appId: "1:182306703534:web:86b8757669edf89f24453f",
-  measurementId: "G-FYNN6VTDMJ",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-// Export Firebase instances
-export { db, storage };
-
-// Login Component
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -39,7 +16,7 @@ export default function Login() {
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPhoneSignIn, setShowPhoneSignIn] = useState(false); // State to toggle views
+  const [showPhoneSignIn, setShowPhoneSignIn] = useState(false);
 
   const handleLoginClick = async () => {
     setError("");
@@ -47,11 +24,9 @@ export default function Login() {
 
     try {
       if (!showPhoneSignIn) {
-        // Email login
         await signInWithEmailAndPassword(auth, email, password);
         router.push("/home");
       } else {
-        // Phone login
         const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
           callback: (response: any) => {
@@ -105,19 +80,15 @@ export default function Login() {
 
       <div className="logunder">
         <div className="log">
-          {/* Toggle between email and phone sign-in */}
           <div className="sign-in-toggle">
-
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
               Email Sign-In/
-
             </button>
-            <button class="button phone_button" onClick={() => setShowPhoneSignIn(true)}>
+            <button className="button phone_button" onClick={() => setShowPhoneSignIn(true)}>
               Phone Sign-In
             </button>
           </div>
 
-          {/* Email sign-in form */}
           {!showPhoneSignIn && (
             <>
               <div className="inputfield">
@@ -145,7 +116,6 @@ export default function Login() {
             </>
           )}
 
-          {/* Phone sign-in form */}
           {showPhoneSignIn && (
             <>
               <div className="inputfield">
@@ -165,14 +135,12 @@ export default function Login() {
 
           {error && <div className="error">{error}</div>}
 
-          {/* Login Button */}
           <div className="login-button">
             <button type="button" onClick={handleLoginClick} disabled={isLoading}>
               Login
             </button>
           </div>
 
-          {/* OTP Verification */}
           {verificationId && (
             <div className="inputfield">
               <label className="otp">OTP</label>
@@ -192,10 +160,8 @@ export default function Login() {
 
           <div className="kai"></div>
           <div className="addition">
-
             <Link href="forgot_pass">＞Forgot your Password?<br /></Link>
             <Link href="New-Account">＞New Account</Link>
-
           </div>
         </div>
       </div>
@@ -203,7 +169,6 @@ export default function Login() {
         <div className="last-line"></div>
       </div>
 
-      {/* ReCAPTCHA container */}
       <div id="recaptcha-container"></div>
     </>
   );

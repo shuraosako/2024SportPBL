@@ -6,7 +6,7 @@ import Image from "next/image";
 import { getAuth, updatePassword, updatePhoneNumber, User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../login/page";
+import { db, storage } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider } from "firebase/auth";
 import "./profile.css";
 import "../home/home.css";

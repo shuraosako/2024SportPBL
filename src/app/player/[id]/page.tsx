@@ -11,7 +11,7 @@ import {
   serverTimestamp,
   getDocs,
 } from "firebase/firestore";
-import { db } from "../../login/page";
+import { db,} from "@/lib/firebase";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import styles from "./PlayerPage.module.css";

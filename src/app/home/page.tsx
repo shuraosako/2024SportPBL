@@ -8,7 +8,7 @@ import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db } from "../login/page";
+import { db,} from "@/lib/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Image from "next/image";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
