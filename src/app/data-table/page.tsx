@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "./../login/page";
+import { db,} from "@/lib/firebase";
 import styles from "./DataTablePage.module.css";
 
 type UploadedRow = Record<string, any>;
