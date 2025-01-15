@@ -175,6 +175,10 @@ input[type="text"]:focus {
   margin-bottom: 5vw;
 }
 
+.email_button{
+  margin: 2px 8px;
+}
+
 .login-button {
   background-color: #5f989c;
   color: white;
@@ -329,7 +333,7 @@ input[type="email"]:focus {
 }
 
 button:hover {
-  background-color: #0056b3;
+  opacity: 0.5;
 }
 
 .date-picker {
@@ -353,4 +357,9 @@ button:hover {
 
 .kai {
   margin: 10px 0;
+
+}
+
+.sign-in-toggle{
+  padding: 12px;
 }
