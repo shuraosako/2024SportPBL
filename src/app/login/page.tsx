@@ -108,7 +108,7 @@ export default function Login() {
           {/* Toggle between email and phone sign-in */}
           <div className="sign-in-toggle">
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
-              Email Sign-In
+              Email Sign-In/
             </button>
             <button type="button" onClick={() => setShowPhoneSignIn(true)}>
               Phone Sign-In
@@ -190,7 +190,7 @@ export default function Login() {
 
           <div className="kai"></div>
           <div className="addition">
-            <Link href="">＞Forgot your Password?<br /></Link>
+            <Link href="forgot_pass">＞Forgot your Password?<br /></Link>
             <Link href="New-Account">＞New Account</Link>
           </div>
         </div>
