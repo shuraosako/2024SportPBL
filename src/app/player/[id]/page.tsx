@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   doc,
   getDoc,
@@ -24,7 +25,6 @@ type Player = {
   imageURL?: string;
 };
 
-// ファイルデータの型定義
 type FileRow = {
   [key: string]: string | number | null;
 };
@@ -65,14 +65,13 @@ export default function PlayerPage() {
       reader.onload = (e) => {
         const data = e.target?.result;
         if (file.type === "text/csv") {
-          // Parse CSV file with a specified encoding
           Papa.parse(data as string, {
             header: true,
-            encoding: "UTF-8", // Explicitly set the encoding to UTF-8
+            encoding: "UTF-8",
             complete: (result) => {
               setFileData(result.data as FileRow[]);
             },
-            skipEmptyLines: true, // Optional: skips any empty lines in the CSV
+            skipEmptyLines: true,
           });
         } else if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
           const workbook = XLSX.read(data, { type: "binary" });
@@ -82,7 +81,7 @@ export default function PlayerPage() {
           setFileData(jsonData as FileRow[]);
         }
       };
-      reader.readAsText(file, "UTF-8"); // Explicitly read the file as UTF-8 encoded text
+      reader.readAsText(file, "UTF-8");
     }
   };
 
@@ -93,31 +92,28 @@ export default function PlayerPage() {
     }
 
     try {
-      const playerRef = doc(db, "players", player.id); // Reference to the player's document
-      const subcollectionRef = collection(playerRef, "csvData"); // Subcollection "csvData"
+      const playerRef = doc(db, "players", player.id);
+      const subcollectionRef = collection(playerRef, "csvData");
 
-      // Delete existing data in the subcollection
       const existingDocsSnapshot = await getDocs(subcollectionRef);
       const batch = writeBatch(db);
       existingDocsSnapshot.forEach((doc) => {
-        batch.delete(doc.ref); // Delete each document in the subcollection
+        batch.delete(doc.ref);
       });
 
-      // Add new data from the CSV file
       fileData.forEach((row) => {
         const docData = {
-          ...row, // Store each row as-is
-          uploadedAt: serverTimestamp(), // Add a timestamp for each row
+          ...row,
+          uploadedAt: serverTimestamp(),
         };
-        const docRef = doc(subcollectionRef); // Auto-generate document ID
+        const docRef = doc(subcollectionRef);
         batch.set(docRef, docData);
       });
 
-      // Commit all batched writes
       await batch.commit();
 
       alert("CSV data replaced successfully!");
-      setFileData([]); // Clear the file data after successful upload
+      setFileData([]);
     } catch (error) {
       console.error("Error replacing data:", error);
       alert("Failed to replace data. Check the console for more details.");
@@ -129,7 +125,6 @@ export default function PlayerPage() {
       alert("Player ID is missing");
       return;
     }
-    // Redirect with the player ID in the query parameter
     router.push(`/data-table?playerId=${player.id}`);
   };
 
@@ -149,10 +144,12 @@ export default function PlayerPage() {
       <p className={styles.info}>Weight: {player.weight} kg</p>
 
       {player.imageURL && (
-        <img
+        <Image
           src={player.imageURL}
           alt={`${player.name}'s profile`}
           className={styles.profilePicture}
+          width={300}
+          height={300}
         />
       )}
 
@@ -195,7 +192,6 @@ export default function PlayerPage() {
         </div>
       )}
 
-      {/* Button to view uploaded data */}
       <button 
             onClick={handleRedirect} 
             className={styles.button}>

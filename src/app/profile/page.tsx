@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { getAuth, updatePassword, updatePhoneNumber, User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -178,10 +179,12 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             </li>
             <li className="profile-section" onClick={toggleProfilePopup}>
               <div className="profile-info">
-                <img
+                <Image
                   src={currentImageURL || "/default-profile.png"}
                   alt="Profile"
                   className="profile-image"
+                  width={40}
+                  height={40}
                 />
                 <span className="username">{user?.email || "Guest"}</span>
               </div>
@@ -227,7 +230,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             <div className="profile-section">
               {currentImageURL && (
                 <div className="profile-current-image">
-                  <img src={currentImageURL} alt="Current Profile" className="profile-image-preview" />
+                  <Image 
+                    src={currentImageURL} 
+                    alt="Current Profile" 
+                    className="profile-image-preview" 
+                    width={200} 
+                    height={200}
+                  />
                 </div>
               )}
             </div>
@@ -285,10 +294,12 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             <div className="profile-section">
               <label className="profile-label">Upload New Profile Photo:</label>
               {previewImage && (
-                <img
+                <Image
                   src={previewImage}
                   alt="Profile Preview"
                   className="profile-image-preview"
+                  width={200}
+                  height={200}
                 />
               )}
               <input
