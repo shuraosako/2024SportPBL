@@ -210,8 +210,6 @@ export default function Home() {
             <Link href="">Settings</Link>
             <div className="kai"></div>
             <Link href="">Rapsodo</Link>
-            <div className="kai"></div>
-            <Link href="/home">Home</Link>
           </div>
         </div>
 
@@ -257,12 +255,9 @@ export default function Home() {
                 </option>
               ))}
             </select>
-            <div className="filter_button">
+
             <button onClick={handleFilter}>Filter</button>
-            </div>
-            <div className="new_player">
-            <button onClick={handleAddNewPlayer}>New Player</button>
-            </div>
+            <button onClick={handleAddNewPlayer}>+ New Player</button>
           </div>
 
           {/* Player Cards */}

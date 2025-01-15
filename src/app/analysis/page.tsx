@@ -106,9 +106,7 @@ export default function AnalysisPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [playerData, setPlayerData] = useState<PlayerData[]>([]);
-  const [currentTab, setCurrentTab] = useState<"average" | "best" | "individual"|"compare">("average");
-  const [comparePlayers, setComparePlayers] = useState<string[]>([]);
-  const [compareField, setCompareField] = useState<keyof PlayerData | null>(null);
+  const [currentTab, setCurrentTab] = useState<"average" | "best" | "individual">("average");
 
 
   useEffect(() => {
@@ -303,59 +301,30 @@ export default function AnalysisPage() {
   // 個人グラフデータの処理
   const getIndividualData = (playerId: string) => {
     const filteredData = playerData
-      .filter((data) => data.id === playerId)
-      .map((data) => {
+      .filter(data => data.id === playerId)
+      .map(data => {
         // Parse and validate the fields
         const parsedSpeed = Number(data.speed);
         const parsedSpin = Number(data.spin);
         const parsedDate = new Date(data.date);
-  
+
         return {
           date: parsedDate,
-          speed: isNaN(parsedSpeed) ? 0 : parsedSpeed, // Ensure valid speed
-          spin: isNaN(parsedSpin) ? 0 : parsedSpin,   // Ensure valid spin
+          speed: isNaN(parsedSpeed) ? 0 : parsedSpeed,  // Ensure valid speed
+          spin: isNaN(parsedSpin) ? 0 : parsedSpin,    // Ensure valid spin
         };
       })
-      .filter((item) => !isNaN(item.speed) && !isNaN(item.spin)); // Filter out invalid entries
-  
-    // Sort the data
-    filteredData.sort((a, b) => {
-      const getValue = (item: typeof filteredData[0], key: SortableField) => {
-        switch (key) {
-          case 'date': return item.date.getTime();
-          case 'speed': return item.speed;
-          case 'spin': return item.spin;
-          default: return 0;
-        }
-      };
-  
-      const aValue = getValue(a, selectedItem);
-      const bValue = getValue(b, selectedItem);
-  
-      // Ascending or Descending order
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-  
-    console.log('Sorted Individual Data:', filteredData); // Debug log
+      .filter(item => !isNaN(item.speed) && !isNaN(item.spin))  // Filter out invalid entries
+      .sort((a, b) => a.date.getTime() - b.date.getTime());  // Sort by date
+
+    console.log('Filtered Individual Data:', filteredData);
     return filteredData;
   };
-  const prepareCompareData = () => {
-    if (!compareField || comparePlayers.length === 0) return [];
-    
-    const data = comparePlayers.map(playerId => {
-      const player = players.find(p => p.id === playerId);
-      const playerStats = playerData.filter(data => data.id === playerId);
-      
-      return {
-        name: player?.name || "Unknown",
-        value: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + (Number(item[compareField]) || 0), 0) / playerStats.length
-          : "NIL",
-      };
-    });
-  
-    return data;
-  };
+
+  // Call the fetchPlayerData function when the component mounts
+  useEffect(() => { 
+    fetchPlayerData();
+  }, []);
   return (
     <>
       <header>
@@ -399,8 +368,6 @@ export default function AnalysisPage() {
             <Link href="">Settings</Link>
             <div className="kai"></div>
             <Link href="">Rapsodo</Link>
-            <div className="kai"></div>
-            <Link href="/home">Home</Link>
           </div>
         </div>
 
@@ -467,7 +434,6 @@ export default function AnalysisPage() {
                 onChange={(e) => setSelectedPlayers(Array.from(e.target.selectedOptions, option => option.value))}
                 className="player-select"
               >
-                <option value="NIL">NIL</option> {/* Default NIL option */}
                 {players.map(player => (
                   <option key={player.id} value={player.id}>
                     {player.name}
@@ -479,26 +445,19 @@ export default function AnalysisPage() {
             {/* タブ切り替え */}
             <div className="tab-container">
               <div className="tabs">
-                {["average", "best", "individual", "compare"].map((tab) => (
+                {["average", "best", "individual"].map((tab) => (
                   <button
                     key={tab}
                     className={`tab-button ${currentTab === tab ? "active" : ""}`}
-                    onClick={() => setCurrentTab(tab as "average" | "best" | "individual" | "compare")}
+                    onClick={() => setCurrentTab(tab as "average" | "best" | "individual")}
                   >
-                    {tab === "average"
-                      ? "平均グラフ"
-                      : tab === "best"
-                      ? "ベストグラフ"
-                      : tab === "individual"
-                      ? "個人グラフ"
-                      : "比較グラフ"}
+                    {tab === "average" ? "平均グラフ" : tab === "best" ? "ベストグラフ" : "個人グラフ"}
                   </button>
                 ))}
               </div>
-            </div>;
+            </div>
 
-{/*
-            
+            {/* データテーブル */}
             <div className="table-container">
               <table className="data-table">
                 <thead>
@@ -527,7 +486,7 @@ export default function AnalysisPage() {
                 </tbody>
               </table>
             </div>
-*/}
+
             {/* グラフ表示 */}
             <div className="graphs-container">
               {currentTab === "average" && (
@@ -648,96 +607,42 @@ export default function AnalysisPage() {
                 </div>
               )}
 
-                  {currentTab === "individual" && selectedPlayers.length > 0 && (
-                    <div className="graph-section">
-                      <h3 className="graph-title">個人グラフ</h3>
-                      {selectedPlayers.map((playerId) => {
-                        const playerName = players.find((p) => p.id === playerId)?.name;
-                        const individualData = getIndividualData(playerId);
-
-                        return (
-                            <div key={playerId} className="individual-graph">
-                              <h4>{playerName} - Pitch Speed vs. Spin</h4>
-                              <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={individualData}>
-                                  <CartesianGrid strokeDasharray="3 3" />
-                                  <XAxis
-                                    dataKey="speed"
-                                    label={{ value: "Speed (kph)", position: "insideBottomRight", offset: 0 }}
-                                    stroke={COLORS.primary}
-                                    type="number"
-                                    domain={["dataMin", "dataMax"]}
-                                  />
-                                  <YAxis
-                                    label={{ value: "Spin", angle: -90, position: "insideLeft" }}
-                                    stroke={COLORS.secondary}
-                                    type="number"
-                                    domain={["dataMin", "dataMax"]}
-                                  />
-                                  <Tooltip content={<CustomTooltip />} />
-                                  <Legend />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="spin"
-                                    stroke={COLORS.secondary}
-                                    name="Spin"
-                                    dot={true}
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          );
-                      })}
-                    </div>
-                  )}
-
-                  {currentTab === "compare" && (
-                    <div className="graph-section">
-                      <h3 className="graph-title">選手比較</h3>
+                {currentTab === "individual" && selectedPlayers.length > 0 && (
+                  <div className="graph-section">
+                    <h3 className="graph-title">個人グラフ</h3>
+                    {selectedPlayers.map(playerId => {
+                      const playerName = players.find(p => p.id === playerId)?.name;
+                      const individualData = getIndividualData(playerId);
                       
-                      {/* Player selection */}
-                      <div className="compare-controls">
-                        <select
-                          multiple
-                          value={comparePlayers}
-                          onChange={(e) => setComparePlayers(Array.from(e.target.selectedOptions, option => option.value))}
-                          className="player-select"
-                        >
-                          {players.map(player => (
-                            <option key={player.id} value={player.id}>
-                              {player.name}
-                            </option>
-                          ))}
-                        </select>
-                        
-                        {/* Field selection */}
-                        <select
-                          value={compareField ?? ""}
-                          onChange={(e) => setCompareField(e.target.value as keyof PlayerData)}
-                          className="field-select"
-                        >
-                          <option value="">データを選択してください</option>
-                          <option value="speed">球速</option>
-                          <option value="spin">SPIN</option>
-                          <option value="trueSpin">TRUE SPIN</option>
-                          <option value="spinEff">SPIN EFF</option>
-                          <option value="spinDirection">SPIN DIRECTION</option>
-                        </select>
-                      </div>
-
-                      {/* Graph */}
-                      <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={prepareCompareData()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis stroke="#666" />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="value" fill="#82ca9d" name={compareField?.toUpperCase()} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
+                      return (
+                        <div key={playerId} className="individual-graph">
+                          <h4>{playerName} - Pitch Speed vs. Spin</h4>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={individualData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis 
+                                dataKey="speed" 
+                                label={{ value: 'Speed (kph)', position: 'insideBottomRight', offset: 0 }} 
+                                stroke={COLORS.primary} 
+                                type="number" // Ensure the type is set to "number"
+                                domain={['dataMin', 'dataMax']} // To dynamically adjust the domain
+                              />
+                              <YAxis 
+                                label={{ value: 'Spin', angle: -90, position: 'insideLeft' }} 
+                                stroke={COLORS.secondary} 
+                                type="number" // Ensure the type is set to "number"
+                                domain={['dataMin', 'dataMax']} // To dynamically adjust the domain
+                              />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Legend />
+                              <Line type="monotone" dataKey="spin" stroke={COLORS.secondary} name="Spin" dot={true} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
             </div>
           </div>
         </div>
