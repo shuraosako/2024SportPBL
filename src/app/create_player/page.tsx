@@ -127,7 +127,7 @@ export default function Homepage() {
           )}
 
           <form onSubmit={handleAddPlayer}>
-            <label>Player's Name:</label>
+            <label>Players Name:</label>
             <input
               type="text"
               value={playerName}
