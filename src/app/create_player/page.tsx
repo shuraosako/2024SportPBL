@@ -4,7 +4,7 @@ import { useState } from "react";
 import "./create_player.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { db, storage } from "../login/page"; // Import Firebase storage and Firestore
+import { db, storage } from "@/lib/firebase"; // Import Firebase storage and Firestore
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase storage functions
 import Image from "next/image";
