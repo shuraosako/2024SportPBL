@@ -8,6 +8,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../login/page";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider } from "firebase/auth";
 import "./profile.css";
+import "../home/home.css";
+import Link from "next/link";
 
 export default function ProfilePage({ params }: { params: { uid: string } }) {
   const router = useRouter();
@@ -23,6 +25,8 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   useEffect(() => {
     const fetchCurrentProfileImage = async () => {
@@ -42,6 +46,10 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
     };
     fetchCurrentProfileImage();
   }, [user]);
+
+  const toggleProfilePopup = () => {
+    setIsProfileOpen(!isProfileOpen);
+  };
 
   const handlePhoneNumberSignIn = async () => {
     if (!phoneNumber) {
@@ -99,7 +107,6 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
     const imageRef = ref(storage, `profile-images/${user.uid}`);
 
     try {
-      // Update password if provided
       if (newPassword) {
         if (newPassword.length < 6) {
           alert("Password must be at least 6 characters long.");
@@ -111,12 +118,10 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
         alert("Password updated successfully.");
       }
 
-      // Update username if provided
       if (newUsername) {
         updates.username = newUsername;
       }
 
-      // Upload and update profile image if provided
       if (profileImage) {
         if (!profileImage.type.startsWith('image/')) {
           alert("Invalid file type. Please upload an image.");
@@ -129,7 +134,6 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
         updates.imageURL = imageURL;
       }
 
-      // Update Firestore if there are changes
       if (Object.keys(updates).length > 0) {
         await updateDoc(doc(db, "users", user.uid), updates);
         alert("Profile updated successfully.");
@@ -158,102 +162,153 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
     }
   };
 
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    router.push(path);
+  };
+
   return (
-    <div className="profile-page">
-      <h1 className="profile-title">Profile Page</h1>
-
-      {isLoading && <div className="loading-spinner">Saving...</div>}
-
-      {/* Current Profile Image Display */}
-      <div className="profile-section">
-        {currentImageURL && (
-          <div className="profile-current-image">
-            <img src={currentImageURL} alt="Current Profile" className="profile-image-preview" />
+    <>
+      <header>
+        <div className="header-container">
+          <div className="logo">SportsPBL</div>
+          <div className="header-right">
+            <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              &#9776;
+            </li>
+            <li className="profile-section" onClick={toggleProfilePopup}>
+              <div className="profile-info">
+                <img
+                  src={currentImageURL || "/default-profile.png"}
+                  alt="Profile"
+                  className="profile-image"
+                />
+                <span className="username">{user?.email || "Guest"}</span>
+              </div>
+              {isProfileOpen && (
+                <div className="profile-popup">
+                  <p>{user?.email}</p>
+                  <button onClick={() => router.push("/profile")}>Profile</button>
+                  <button onClick={() => router.push("/login")}>Logout</button>
+                </div>
+              )}
+            </li>
+            <li><Link href="/login">LOGIN</Link></li>
+            <li><Link href="http://localhost:3000">TOP</Link></li>
+            <li><a href="#">Setting</a></li>
           </div>
-        )}
-      </div>
-
-      {/* Phone Number Section */}
-      <div className="profile-section">
-        <label className="profile-label">Phone Number:</label>
-        <input
-          type="tel"
-          className="profile-input"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          placeholder="+1234567890"
-        />
-        <button className="profile-button" onClick={handlePhoneNumberSignIn}>
-          Send OTP
-        </button>
-      </div>
-
-      {/* OTP Verification */}
-      {verificationId && (
-        <div className="profile-section">
-          <label className="profile-label">OTP:</label>
-          <input
-            type="text"
-            className="profile-input"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
-          />
-          <button className="profile-button" onClick={handleVerifyOtp}>
-            Verify OTP
-          </button>
         </div>
-      )}
+      </header>
+      <div className="header-underline"></div>
 
-      {/* Password Input */}
-      <div className="profile-section">
-        <label className="profile-label">New Password:</label>
-        <input
-          type="password"
-          className="profile-input"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
+      <div className="main-content">
+        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
+          <div className="Selection">
+            <a href="/home" onClick={(e) => handleNavigation(e, "/home")}>Home</a>
+            <div className="kai"></div>
+            <a href="/analysis" onClick={(e) => handleNavigation(e, "/analysis")}>Analysis</a>
+            <div className="kai"></div>
+            <a href="/profile" onClick={(e) => handleNavigation(e, "/profile")}>Profile</a>
+            <div className="kai"></div>
+            <a href="#" onClick={(e) => e.preventDefault()}>Settings</a>
+            <div className="kai"></div>
+            <a href="#" onClick={(e) => e.preventDefault()}>Rapsodo</a>
+            <div className="kai"></div>
+            <a href="/home" onClick={(e) => handleNavigation(e, "/home")}>Home</a>
+          </div>
+        </div>
+
+        <div className="RightContent">
+          <div className="profile-page">
+            <h1 className="profile-title">Profile Page</h1>
+
+            {isLoading && <div className="loading-spinner">Saving...</div>}
+
+            <div className="profile-section">
+              {currentImageURL && (
+                <div className="profile-current-image">
+                  <img src={currentImageURL} alt="Current Profile" className="profile-image-preview" />
+                </div>
+              )}
+            </div>
+
+            <div className="profile-section">
+              <label className="profile-label">Phone Number:</label>
+              <input
+                type="tel"
+                className="profile-input"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+1234567890"
+              />
+              <button className="profile-button" onClick={handlePhoneNumberSignIn}>
+                Send OTP
+              </button>
+            </div>
+
+            {verificationId && (
+              <div className="profile-section">
+                <label className="profile-label">OTP:</label>
+                <input
+                  type="text"
+                  className="profile-input"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                />
+                <button className="profile-button" onClick={handleVerifyOtp}>
+                  Verify OTP
+                </button>
+              </div>
+            )}
+
+            <div className="profile-section">
+              <label className="profile-label">New Password:</label>
+              <input
+                type="password"
+                className="profile-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="profile-section">
+              <label className="profile-label">New Username:</label>
+              <input
+                type="text"
+                className="profile-input"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            </div>
+
+            <div className="profile-section">
+              <label className="profile-label">Upload New Profile Photo:</label>
+              {previewImage && (
+                <img
+                  src={previewImage}
+                  alt="Profile Preview"
+                  className="profile-image-preview"
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="profile-input-file"
+                onChange={handleImageChange}
+              />
+            </div>
+
+            <div className="profile-section">
+              <button className="profile-button" onClick={handleSaveChanges} disabled={isLoading}>
+                Save Changes
+              </button>
+            </div>
+
+            <div id="recaptcha-container"></div>
+          </div>
+        </div>
       </div>
-
-      {/* Username Input */}
-      <div className="profile-section">
-        <label className="profile-label">New Username:</label>
-        <input
-          type="text"
-          className="profile-input"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value)}
-        />
-      </div>
-
-      {/* Profile Image Upload */}
-      <div className="profile-section">
-        <label className="profile-label">Upload New Profile Photo:</label>
-        {previewImage && (
-          <img
-            src={previewImage}
-            alt="Profile Preview"
-            className="profile-image-preview"
-          />
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          className="profile-input-file"
-          onChange={handleImageChange}
-        />
-      </div>
-
-      {/* Save Changes Button */}
-      <div className="profile-section">
-        <button className="profile-button" onClick={handleSaveChanges} disabled={isLoading}>
-          Save Changes
-        </button>
-      </div>
-
-      {/* ReCAPTCHA Container */}
-      <div id="recaptcha-container"></div>
-    </div>
+    </>
   );
 }
