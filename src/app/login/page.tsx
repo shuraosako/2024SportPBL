@@ -82,10 +82,10 @@ export default function Login() {
         <div className="log">
           <div className="sign-in-toggle">
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
-              Email Sign-In/
+              Email
             </button>
             <button className="button phone_button" onClick={() => setShowPhoneSignIn(true)}>
-              Phone Sign-In
+              Phone
             </button>
           </div>
 
