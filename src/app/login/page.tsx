@@ -82,17 +82,18 @@ export default function Login() {
         <div className="log">
           <div className="sign-in-toggle">
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
-              Email Sign In
+              メールでログイン　
             </button>
             <button className="button phone_button" onClick={() => setShowPhoneSignIn(true)}>
-              Phone Sign In
+              電話番号でログイン
             </button>
           </div>
+
 
           {!showPhoneSignIn && (
             <>
               <div className="inputfield">
-                <label className="mailaddress">Email Address</label>
+                <label className="mailaddress">メールアドレス</label>
                 <input
                   type="email"
                   id="mailaddress"
@@ -103,7 +104,7 @@ export default function Login() {
                 />
               </div>
               <div className="inputfield">
-                <label className="pass">Password</label>
+                <label className="pass">パスワード</label>
                 <input
                   type="password"
                   id="pass"
@@ -136,8 +137,8 @@ export default function Login() {
           {error && <div className="error">{error}</div>}
 
           <div className="login-button">
-            <button type="button" onClick={handleLoginClick} disabled={isLoading}>
-              Login
+            <button type="button" onClick={handleLoginClick} disabled={isLoading}style={{fontSize:"24px"}}> 
+              ログイン
             </button>
           </div>
 
@@ -160,8 +161,8 @@ export default function Login() {
 
           <div className="kai"></div>
           <div className="addition">
-            <Link href="forgot_pass">＞Forgot your Password?<br /></Link>
-            <Link href="New-Account">＞New Account</Link>
+            <Link href="forgot_pass">＞パスワードを忘れた方<br /></Link>
+            <Link href="New-Account">＞新しいアカウントを作る方</Link>
           </div>
         </div>
       </div>
