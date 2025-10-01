@@ -276,10 +276,13 @@ export default function Home() {
                     <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
                   )}
                   <h3>{player.name}</h3>
-                  <p>Grade: {player.grade}</p>
-                  <p>Height: {player.height} cm</p>
-                  <p>Weight: {player.weight} kg</p>
-                  <p>Joined: {formatCreationDate(player.creationDate)}</p>
+                  <p>学年: {player.grade}</p>
+                  <p>身長: {player.height} cm</p>
+                  <p>体重: {player.weight} kg</p>
+                  <p>最終更新日: {formatCreationDate(player.creationDate)}</p>
+                  <p>最高球速/直近の球速:</p>
+                  <p>得意球種:</p>
+
                 </Link>
               ))
             ) : (
