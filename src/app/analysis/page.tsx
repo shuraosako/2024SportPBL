@@ -486,7 +486,7 @@ export default function AnalysisPage() {
                     onClick={() => setCurrentTab(tab as "average" | "best" | "individual" | "compare")}
                   >
                     {tab === "average"
-                      ? "平均グラフ"
+                      ? "全体グラフ"
                       : tab === "best"
                       ? "ベストグラフ"
                       : tab === "individual"
@@ -532,7 +532,8 @@ export default function AnalysisPage() {
             <div className="graphs-container">
               {currentTab === "average" && (
                 <div className="graph-section">
-                  <h3 className="graph-title">平均値グラフ</h3>
+                  <h3 className="graph-title">全体グラフ
+                  </h3>
                   <div className="graph-grid">
                     <div className="graph-item">
                       <ResponsiveContainer width="100%" height={300}>
