@@ -20,6 +20,13 @@ type Player = {
   grade: string;
   height: number;
   weight: number;
+  fatiguelevel: number;
+  maxspeed: number;
+  condition: number;
+  positions: string[];
+  pitchingAndBattingStyles: string[];
+  pitchTypes: string[];
+  Health: string[];
   imageURL?: string;
   creationDate?: { seconds: number; nanoseconds: number }; // Firestore timestamp format
 };
