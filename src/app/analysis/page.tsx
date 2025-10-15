@@ -106,7 +106,7 @@ export default function AnalysisPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [playerData, setPlayerData] = useState<PlayerData[]>([]);
-  const [currentTab, setCurrentTab] = useState<"average" | "best" | "individual"|"compare">("average");
+  const [currentTab, setCurrentTab] = useState<"whole" | "best" | "individual"|"compare">("whole");
   const [comparePlayers, setComparePlayers] = useState<string[]>([]);
   const [compareField, setCompareField] = useState<keyof PlayerData | null>(null);
 
@@ -479,14 +479,14 @@ export default function AnalysisPage() {
             {/* タブ切り替え */}
             <div className="tab-container">
               <div className="tabs">
-                {["average", "best", "individual", "compare"].map((tab) => (
+                {["whole", "best", "individual", "compare"].map((tab) => (
                   <button
                     key={tab}
                     className={`tab-button ${currentTab === tab ? "active" : ""}`}
-                    onClick={() => setCurrentTab(tab as "average" | "best" | "individual" | "compare")}
+                    onClick={() => setCurrentTab(tab as "whole" | "best" | "individual" | "compare")}
                   >
-                    {tab === "average"
-                      ? "平均グラフ"
+                    {tab === "whole"
+                      ? "全体"
                       : tab === "best"
                       ? "ベストグラフ"
                       : tab === "individual"
@@ -530,64 +530,7 @@ export default function AnalysisPage() {
 */}
             {/* グラフ表示 */}
             <div className="graphs-container">
-              {currentTab === "average" && (
-                <div className="graph-section">
-                  <h3 className="graph-title">平均値グラフ</h3>
-                  <div className="graph-grid">
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={calculateAverages()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis 
-                            yAxisId="speed"
-                            orientation="left"
-                            stroke={COLORS.primary}
-                            domain={['auto', 'auto']}
-                          />
-                          <YAxis 
-                            yAxisId="spin"
-                            orientation="right"
-                            stroke={COLORS.secondary}
-                            domain={['auto', 'auto']}
-                          />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Line 
-                            yAxisId="speed"
-                            type="monotone" 
-                            dataKey="avgSpeed" 
-                            stroke={COLORS.primary} 
-                            name="平均球速"
-                            dot={true}
-                          />
-                          <Line 
-                            yAxisId="spin"
-                            type="monotone" 
-                            dataKey="avgSpin" 
-                            stroke={COLORS.secondary} 
-                            name="平均SPIN"
-                            dot={true}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={calculateAverages()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis stroke="#666" />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Bar dataKey="avgSpeed" fill={COLORS.primary} name="平均球速" />
-                          <Bar dataKey="avgSpin" fill={COLORS.secondary} name="平均SPIN" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-              )}
+             
 
               {currentTab === "best" && (
                 <div className="graph-section">
@@ -725,7 +668,7 @@ export default function AnalysisPage() {
                         </select>
                       </div>
 
-                      {/* Graph */}
+                     {/* Graph */}
                       <ResponsiveContainer width="100%" height={400}>
                         <BarChart data={prepareCompareData()}>
                           <CartesianGrid strokeDasharray="3 3" />
