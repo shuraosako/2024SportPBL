@@ -485,8 +485,6 @@ export default function AnalysisPage() {
                     className={`tab-button ${currentTab === tab ? "active" : ""}`}
                     onClick={() => setCurrentTab(tab as "whole" | "best" | "individual" | "compare")}
                   >
-                    {tab === "whole"
-                      ? "全体"
                       : tab === "best"
                       ? "ベストグラフ"
                       : tab === "individual"
@@ -530,7 +528,6 @@ export default function AnalysisPage() {
 */}
             {/* グラフ表示 */}
             <div className="graphs-container">
-             
 
               {currentTab === "best" && (
                 <div className="graph-section">
