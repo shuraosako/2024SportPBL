@@ -135,7 +135,7 @@
   }
   
   .table th {
-    background-color: #00bcd4;
+    background-color: hsl(187, 100%, 42%);
     color: white;
   }
   
