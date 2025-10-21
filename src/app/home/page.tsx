@@ -9,19 +9,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
-import Navigation from "@/components/Navigation";
- 
-// Define the Player type with imageURL and creationDate
-type Player = {
-  id: string;
-  name: string;
-  grade: string;
-  height: number;
-  weight: number;
-  imageURL?: string;
-  creationDate?: { seconds: number; nanoseconds: number }; // Firestore timestamp format
-};
- 
+import Navigation from "@/components/layout/Navigation";
+import { Player } from "@/types";
+import { formatFirebaseDate } from "@/utils";
+
 export default function Home() {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -59,12 +50,6 @@ export default function Home() {
     fetchPlayers();
   }, []);
 
-  const formatCreationDate = (timestamp?: { seconds: number; nanoseconds: number }) => {
-    return timestamp
-      ? new Date(timestamp.seconds * 1000).toLocaleDateString("en-GB") // Format as DD/MM/YYYY
-      : "Unknown date";
-  };
- 
   const handleFilter = () => {
     let filtered = players;
  
@@ -187,7 +172,7 @@ export default function Home() {
                   <p>学年: {player.grade}</p>
                   <p>身長: {player.height} cm</p>
                   <p>体重: {player.weight} kg</p>
-                  <p>最終更新日: {formatCreationDate(player.creationDate)}</p>
+                  <p>最終更新日: {formatFirebaseDate(player.creationDate)}</p>
                   <p>最高球速/直近の球速:</p>
                   <p>得意球種:</p>
 

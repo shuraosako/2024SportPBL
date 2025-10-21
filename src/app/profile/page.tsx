@@ -8,7 +8,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider } from "firebase/auth";
-import Navigation from "@/components/Navigation";
+import Navigation from "@/components/layout/Navigation";
 import "./profile.css";
 import "../home/home.css";
 

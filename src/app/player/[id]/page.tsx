@@ -14,7 +14,7 @@ import {
 import { db } from "@/lib/firebase";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import Navigation from "@/components/Navigation";
+import Navigation from "@/components/layout/Navigation";
 import styles from "./PlayerPage.module.css";
 
 type Player = {

@@ -7,7 +7,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./analysis.css";
-import Navigation from "@/components/Navigation";
+import Navigation from "@/components/layout/Navigation";
 import { useRouter } from "next/navigation";
 
 // 色の定義
