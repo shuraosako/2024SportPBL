@@ -3,27 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getFirestore, setDoc, doc } from "firebase/firestore";
-
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCoq3lwqjKG1Ja9OQMlmQyOsBFot_fEMXU",
-  authDomain: "sports-pbl.firebaseapp.com",
-  projectId: "sports-pbl",
-  storageBucket: "sports-pbl.appspot.com",
-  messagingSenderId: "182306703534",
-  appId: "1:182306703534:web:86b8757669edf89f24453f",
-  measurementId: "G-FYNN6VTDMJ",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const storage = getStorage();
-const db = getFirestore();
+import { setDoc, doc } from "firebase/firestore";
+import { auth, storage, db } from "@/lib/firebase";
+import styles from './newaccount.module.css';
 
 export default function Login() {
   const router = useRouter();
@@ -80,93 +64,98 @@ export default function Login() {
   return (
     <>
       <header>
-        <ul>
-          <li className="logo">SportsPBL</li>
-          <div className="header-right">
+        <div className="logo">SportsPBL</div>
+        <div className="header-right">
+          <ul>
             <li><Link href="/login">LOGIN</Link></li>
             <li><Link href="/">TOP</Link></li>
-            <li><a href="#">Settings</a></li>
-          </div>
-        </ul>
+            <li><Link href="/setting">Settings</Link></li>
+          </ul>
+        </div>
       </header>
 
-      <div className="newunder">
-        <div className="new">
-          <div className="profile-upload" style={{ textAlign: 'center', margin: '10px 0' }}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageChange} 
-              style={{ display: 'none' }} 
+      <div className={styles.newunder}>
+        <div className={styles.new}>
+          <h2 style={{ marginBottom: '10px', color: '#333' }}>新規アカウント作成</h2>
+
+          <div className={styles.profileUpload}>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
               id="profileImageInput"
             />
-            <label htmlFor="profileImageInput" style={{ cursor: 'pointer' }}>
-              <div style={{
-                width: '100px', 
-                height: '100px', 
-                borderRadius: '50%', 
-                overflow: 'hidden',
-                border: '2px dashed #ccc', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                position: 'relative'
-              }}>
-                {profileImage ? (
-                  <Image 
-                    src={URL.createObjectURL(profileImage)} 
-                    alt="Profile Picture" 
-                    layout="fill" 
-                    objectFit="cover"
-                    style={{ borderRadius: '50%' }}
-                  />
-                ) : (
-                  <span style={{ textAlign: 'center' }}>Upload Image</span>
-                )}
+            <label htmlFor="profileImageInput" className={styles.profileImageLabel}>
+              <div className={styles.imagePreview}>
+                <div className={styles.imagePreviewContent}>
+                  {profileImage ? (
+                    <Image
+                      src={URL.createObjectURL(profileImage)}
+                      alt="Profile Picture"
+                      fill
+                      style={{ objectFit: 'cover', borderRadius: '50%' }}
+                    />
+                  ) : (
+                    <span className={styles.uploadText}>画像を選択</span>
+                  )}
+                </div>
               </div>
             </label>
           </div>
 
-          {/* Registration Form */}
-          <div>
-            <label>Email Address</label>
-            <input 
-              type="text" 
-              id="mailaddress" 
-              name="mailaddress" 
+          <div className={styles.formGroup}>
+            <label>メールアドレス</label>
+            <input
+              type="email"
+              id="mailaddress"
+              name="mailaddress"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@email.com"
+              required
             />
           </div>
-          <div>
-            <label>Password</label>
-            <input 
-              type="password" 
-              id="pass" 
-              name="password" 
+
+          <div className={styles.formGroup}>
+            <label>パスワード</label>
+            <input
+              type="password"
+              id="pass"
+              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="8文字以上"
+              required
             />
           </div>
-          <div>
-            <label>Confirm Password</label>
-            <input 
-              type="password" 
-              id="checkpass" 
-              name="checkpassword" 
+
+          <div className={styles.formGroup}>
+            <label>パスワード確認</label>
+            <input
+              type="password"
+              id="checkpass"
+              name="checkpassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="もう一度パスワードを入力"
+              required
             />
           </div>
-          <div className="kai"></div>
-          <div className="login-button">
-            <button id="submit" type="submit" onClick={handleRegister}>Create Account</button>
-          </div>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+
+          <button
+            type="submit"
+            onClick={handleRegister}
+            className={styles.createButton}
+          >
+            アカウント作成
+          </button>
+
+          {error && <div className={styles.error}>{error}</div>}
         </div>
       </div>
-      <div className="last">
-        <div className="last-line"></div>
+
+      <div className={styles.last}>
+        <div className={styles.lastLine}></div>
       </div>
     </>
   );

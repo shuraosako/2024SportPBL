@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git pull:*)",
       "Bash(git merge:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRefactor UI and improve code organization\n\n主な変更点:\n- ハードコードされたlocalhostのURLを相対パスに修正\n- globals.cssを整理し、共通スタイルのみに集約\n- ページ別にCSS Modulesを導入（page.module.css、login.module.css）\n- レスポンシブデザインの改善（vw単位をclamp()やpx単位に変更）\n- <img>タグを<Image>コンポーネントに変更してパフォーマンス向上\n- ESLintエラーの修正\n- ビルドエラーの修正（analysisページのタブ名を\"average\"から\"whole\"に変更）\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

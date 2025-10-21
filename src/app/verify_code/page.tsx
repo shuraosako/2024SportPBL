@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import "./verify_code.css"; // CSSをインポート
+import Link from "next/link";
+import "./verify_code.css";
 
 export default function VerifyCode() {
   const [code, setCode] = useState("");
@@ -15,21 +16,35 @@ export default function VerifyCode() {
   };
 
   return (
-    <div className="container">
-      <h1>確認コード入力</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="code">code</label>
-          <input
-            type="text"
-            id="code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
-          />
+    <>
+      <header>
+        <div className="logo">SportsPBL</div>
+        <div className="header-right">
+          <ul>
+            <li><Link href="/login">LOGIN</Link></li>
+            <li><Link href="/">TOP</Link></li>
+            <li><Link href="/setting">Settings</Link></li>
+          </ul>
         </div>
-        <button type="submit">送信</button>
-      </form>
-    </div>
+      </header>
+
+      <div className="container">
+        <h1>確認コード入力</h1>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="code">確認コード</label>
+            <input
+              type="text"
+              id="code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="6桁のコードを入力"
+              required
+            />
+          </div>
+          <button type="submit">送信</button>
+        </form>
+      </div>
+    </>
   );
 }
