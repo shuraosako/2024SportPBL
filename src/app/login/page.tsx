@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth,db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
+import styles from './login.module.css';
 
 export default function Login() {
   const router = useRouter();
@@ -72,28 +72,27 @@ export default function Login() {
         <div className="header-right">
           <ul>
             <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">Settings</a></li>
+            <li><Link href="/">TOP</Link></li>
+            <li><Link href="/setting">Settings</Link></li>
           </ul>
         </div>
       </header>
 
-      <div className="logunder">
-        <div className="log">
-          <div className="sign-in-toggle">
+      <div className={styles.logunder}>
+        <div className={styles.log}>
+          <div className={styles.signInToggle}>
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
-              メールでログイン　
+              メールでログイン
             </button>
-            <button className="button phone_button" onClick={() => setShowPhoneSignIn(true)}>
+            <button type="button" onClick={() => setShowPhoneSignIn(true)}>
               電話番号でログイン
             </button>
           </div>
 
-
           {!showPhoneSignIn && (
             <>
               <div className="inputfield">
-                <label className="mailaddress">メールアドレス</label>
+                <label>メールアドレス</label>
                 <input
                   type="email"
                   id="mailaddress"
@@ -104,7 +103,7 @@ export default function Login() {
                 />
               </div>
               <div className="inputfield">
-                <label className="pass">パスワード</label>
+                <label>パスワード</label>
                 <input
                   type="password"
                   id="pass"
@@ -118,56 +117,63 @@ export default function Login() {
           )}
 
           {showPhoneSignIn && (
-            <>
-              <div className="inputfield">
-                <label className="phone">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+1234567890"
-                  required
-                />
-              </div>
-            </>
+            <div className="inputfield">
+              <label>電話番号</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+81 90-1234-5678"
+                required
+              />
+            </div>
           )}
 
-          {error && <div className="error">{error}</div>}
+          {error && <div className={styles.error}>{error}</div>}
 
-          <div className="login-button">
-            <button type="button" onClick={handleLoginClick} disabled={isLoading}style={{fontSize:"24px"}}> 
-              ログイン
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLoginClick}
+            disabled={isLoading}
+            className={styles.loginButton}
+          >
+            {isLoading ? 'ログイン中...' : 'ログイン'}
+          </button>
 
           {verificationId && (
             <div className="inputfield">
-              <label className="otp">OTP</label>
+              <label>認証コード</label>
               <input
                 type="text"
                 id="otp"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter OTP"
+                placeholder="認証コードを入力"
                 required
               />
-              <button type="button" onClick={handleVerifyOtpClick} disabled={isLoading}>
-                Verify OTP
+              <button
+                type="button"
+                onClick={handleVerifyOtpClick}
+                disabled={isLoading}
+                className={styles.loginButton}
+              >
+                認証
               </button>
             </div>
           )}
 
-          <div className="kai"></div>
-          <div className="addition">
-            <Link href="forgot_pass">＞パスワードを忘れた方<br /></Link>
-            <Link href="New-Account">＞新しいアカウントを作る方</Link>
+          <div className={styles.addition}>
+            <Link href="/forgot_pass">＞パスワードを忘れた方</Link>
+            <br />
+            <Link href="/New-Account">＞新しいアカウントを作る方</Link>
           </div>
         </div>
       </div>
-      <div className="last">
-        <div className="last-line"></div>
+
+      <div className={styles.last}>
+        <div className={styles.lastLine}></div>
       </div>
 
       <div id="recaptcha-container"></div>

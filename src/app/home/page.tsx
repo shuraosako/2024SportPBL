@@ -175,10 +175,12 @@ export default function Home() {
             {/* Profile Section */}
             <li className="profile-section" onClick={toggleProfilePopup}>
               <div className="profile-info">
-                <img
+                <Image
                   src={profileImage || "/default-profile.png"} // Default profile image if not available
                   alt="Profile"
                   className="profile-image"
+                  width={40}
+                  height={40}
                 />
                 <span className="username">{userName || "Guest"}</span> {/* Show username */}
               </div>
@@ -191,8 +193,8 @@ export default function Home() {
               )}
             </li>
             <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">Setting</a></li>
+            <li><Link href="/">TOP</Link></li>
+            <li><Link href="/setting">Settings</Link></li>
           </div>
         </div>
       </header>
@@ -273,7 +275,13 @@ export default function Home() {
               filteredPlayers.map((player) => (
                 <Link key={player.id} href={`/player/${player.id}`} className="player-card">
                   {player.imageURL && (
-                    <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
+                    <Image
+                      src={player.imageURL}
+                      alt={`${player.name}'s profile`}
+                      className="player-photo"
+                      width={80}
+                      height={80}
+                    />
                   )}
                   <h3>{player.name}</h3>
                   <p>学年: {player.grade}</p>

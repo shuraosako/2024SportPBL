@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db,} from "@/lib/firebase";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis  } from 'recharts';
+import { db } from "@/lib/firebase";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./analysis.css";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -452,10 +453,12 @@ export default function AnalysisPage() {
           <li className="logo"><Link href="/home"></Link>SportsPBL</li>
           <div className="header-right">
             <li className="profile-section" onClick={toggleProfilePopup}>
-              <img
+              <Image
                 src={profileImage || "/default-profile.png"}
                 alt="Profile"
                 className="profile-image"
+                width={40}
+                height={40}
               />
               {isProfileOpen && (
                 <div className="profile-popup">
@@ -466,8 +469,8 @@ export default function AnalysisPage() {
               )}
             </li>
             <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">Setting</a></li>
+            <li><Link href="/">TOP</Link></li>
+            <li><Link href="/setting">Settings</Link></li>
           </div>
         </ul>
       </header>
@@ -571,8 +574,8 @@ export default function AnalysisPage() {
                     className={`tab-button ${currentTab === tab ? "active" : ""}`}
                     onClick={() => setCurrentTab(tab as "whole" | "best" | "individual" | "compare")}
                   >
-                    {tab === "average"
-                      ? "平均グラフ"
+                    {tab === "whole"
+                      ? "全体グラフ"
                       : tab === "best"
                       ? "ベストグラフ"
                       : tab === "individual"
@@ -616,9 +619,9 @@ export default function AnalysisPage() {
 */}
             {/* グラフ表示 */}
             <div className="graphs-container">
-              {currentTab === "average" && (
+              {currentTab === "whole" && (
                 <div className="graph-section">
-                  <h3 className="graph-title">平均値グラフ</h3>
+                  <h3 className="graph-title">全体グラフ</h3>
                   <div className="graph-grid">
                     <div className="graph-item">
                       <ResponsiveContainer width="100%" height={300}>
