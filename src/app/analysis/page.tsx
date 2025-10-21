@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db,} from "@/lib/firebase";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis  } from 'recharts';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./analysis.css";
@@ -255,6 +255,92 @@ export default function AnalysisPage() {
     return null;
   };
 
+  // レーダーチャート用の関数
+  const prepareRadarData = () => {
+    const subjects = ['球速', '回転数', 'TRUE SPIN', 'SPIN EFF', 'ストライク率'];
+    
+    // 各指標の最大値を計算（正規化用）
+    const maxValues = {
+      speed: Math.max(...playerData.map(d => d.speed)),
+      spin: Math.max(...playerData.map(d => d.spin)),
+      trueSpin: Math.max(...playerData.map(d => d.trueSpin)),
+      spinEff: Math.max(...playerData.map(d => d.spinEff)),
+      strike: 1 // ストライク率は0-1なので最大値は1
+    };
+
+    const radarData = subjects.map(subject => {
+      const dataPoint: any = { subject };
+      
+      comparePlayers.forEach(playerId => {
+        const playerStats = playerData.filter(data => data.id === playerId);
+        if (playerStats.length > 0) {
+          let value = 0;
+          switch (subject) {
+            case '球速':
+              value = (playerStats.reduce((sum, item) => sum + item.speed, 0) / playerStats.length) / maxValues.speed * 100;
+              break;
+            case '回転数':
+              value = (playerStats.reduce((sum, item) => sum + item.spin, 0) / playerStats.length) / maxValues.spin * 100;
+              break;
+            case 'TRUE SPIN':
+              value = (playerStats.reduce((sum, item) => sum + item.trueSpin, 0) / playerStats.length) / maxValues.trueSpin * 100;
+              break;
+            case 'SPIN EFF':
+              value = (playerStats.reduce((sum, item) => sum + item.spinEff, 0) / playerStats.length) / maxValues.spinEff * 100;
+              break;
+            case 'ストライク率':
+              value = (playerStats.reduce((sum, item) => sum + item.strike, 0) / playerStats.length) * 100;
+              break;
+          }
+          dataPoint[playerId] = Math.round(value);
+        }
+      });
+      
+      return dataPoint;
+    });
+
+    return radarData;
+  };
+
+  const getPlayerCompareStats = (playerId: string) => {
+    const playerStats = playerData.filter(data => data.id === playerId);
+    
+    if (playerStats.length === 0) {
+      return {
+        avgSpeed: 0, maxSpeed: 0, avgSpin: 0, maxSpin: 0,
+        avgTrueSpin: 0, avgSpinEff: 0
+      };
+    }
+
+    return {
+      avgSpeed: playerStats.reduce((sum, item) => sum + item.speed, 0) / playerStats.length,
+      maxSpeed: Math.max(...playerStats.map(item => item.speed)),
+      avgSpin: playerStats.reduce((sum, item) => sum + item.spin, 0) / playerStats.length,
+      maxSpin: Math.max(...playerStats.map(item => item.spin)),
+      avgTrueSpin: playerStats.reduce((sum, item) => sum + item.trueSpin, 0) / playerStats.length,
+      avgSpinEff: playerStats.reduce((sum, item) => sum + item.spinEff, 0) / playerStats.length,
+    };
+  };
+
+  const prepareCompareData2 = () => {
+    if (!compareField || comparePlayers.length === 0) return [];
+    
+    const data = comparePlayers.map(playerId => {
+      const player = players.find(p => p.id === playerId);
+      const playerStats = playerData.filter(data => data.id === playerId);
+      
+      return {
+        name: player?.name || "Unknown",
+        value: playerStats.length 
+          ? playerStats.reduce((sum, item) => sum + (Number(item[compareField]) || 0), 0) / playerStats.length
+          : 0,
+      };
+    });
+  
+    return data;
+  };
+
+
   // 平均値の計算
   const calculateAverages = () => {
     const averages = players.map(player => {
@@ -486,7 +572,7 @@ export default function AnalysisPage() {
                     onClick={() => setCurrentTab(tab as "average" | "best" | "individual" | "compare")}
                   >
                     {tab === "average"
-                      ? "全体グラフ"
+                      ? "平均グラフ"
                       : tab === "best"
                       ? "ベストグラフ"
                       : tab === "individual"
@@ -532,8 +618,7 @@ export default function AnalysisPage() {
             <div className="graphs-container">
               {currentTab === "average" && (
                 <div className="graph-section">
-                  <h3 className="graph-title">全体グラフ
-                  </h3>
+                  <h3 className="graph-title">平均値グラフ</h3>
                   <div className="graph-grid">
                     <div className="graph-item">
                       <ResponsiveContainer width="100%" height={300}>
@@ -739,6 +824,98 @@ export default function AnalysisPage() {
                       </ResponsiveContainer>
                     </div>
                   )}
+                      {/* 比較グラフ - レーダーチャート */}
+              {currentTab === "compare" && (
+                <div className="graph-section">
+                  <h3 className="graph-title">選手比較 (レーダーチャート)</h3>
+                  
+                  {/* Player selection */}
+                  <div className="compare-controls">
+                    <select
+                      multiple
+                      value={comparePlayers}
+                      onChange={(e) => setComparePlayers(Array.from(e.target.selectedOptions, option => option.value))}
+                      className="player-select"
+                    >
+                      {players.map(player => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* レーダーチャート */}
+                  {comparePlayers.length > 0 && (
+                    <div className="radar-chart-container">
+                      <ResponsiveContainer width="100%" height={500}>
+                        <RadarChart data={prepareRadarData()}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="subject" />
+                          <PolarRadiusAxis 
+                            angle={0} 
+                            domain={[0, 100]} 
+                            tick={false}
+                          />
+                          <Tooltip />
+                          <Legend />
+                          {comparePlayers.map((playerId, index) => {
+                            const playerName = players.find(p => p.id === playerId)?.name;
+                            const colors = [COLORS.primary, COLORS.secondary, COLORS.accent, '#ff7300', '#00ff73'];
+                            return (
+                              <Radar
+                                key={playerId}
+                                name={playerName}
+                                dataKey={playerId}
+                                stroke={colors[index % colors.length]}
+                                fill={colors[index % colors.length]}
+                                fillOpacity={0.1}
+                                strokeWidth={2}
+                              />
+                            );
+                          })}
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+
+                  {/* 詳細比較テーブル */}
+                  {comparePlayers.length > 0 && (
+                    <div className="compare-table-container">
+                      <h4>詳細比較</h4>
+                      <table className="compare-table">
+                        <thead>
+                          <tr>
+                            <th>選手名</th>
+                            <th>平均球速</th>
+                            <th>最高球速</th>
+                            <th>平均回転数</th>
+                            <th>最高回転数</th>
+                            <th>平均TRUE SPIN</th>
+                            <th>平均SPIN EFF</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparePlayers.map(playerId => {
+                            const playerStats = getPlayerCompareStats(playerId);
+                            return (
+                              <tr key={playerId}>
+                                <td>{players.find(p => p.id === playerId)?.name}</td>
+                                <td>{playerStats.avgSpeed.toFixed(1)} km/h</td>
+                                <td>{playerStats.maxSpeed} km/h</td>
+                                <td>{playerStats.avgSpin.toFixed(0)}</td>
+                                <td>{playerStats.maxSpin}</td>
+                                <td>{playerStats.avgTrueSpin.toFixed(0)}</td>
+                                <td>{playerStats.avgSpinEff.toFixed(1)}%</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
