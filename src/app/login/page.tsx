@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import Navigation from "@/components/layout/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import styles from './login.module.css';
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -67,16 +70,7 @@ export default function Login() {
 
   return (
     <>
-      <header>
-        <div className="logo">SportsPBL</div>
-        <div className="header-right">
-          <ul>
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="/">TOP</Link></li>
-            <li><Link href="/setting">Settings</Link></li>
-          </ul>
-        </div>
-      </header>
+      <Navigation showProfile={false} showHamburger={false} />
 
       <div className={styles.logunder}>
         <div className={styles.log}>

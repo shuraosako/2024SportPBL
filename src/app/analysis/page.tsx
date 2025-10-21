@@ -3,133 +3,39 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import "./analysis.css";
-import Navigation from "@/components/layout/Navigation";
 import { useRouter } from "next/navigation";
-
-// 色の定義
-const COLORS = {
-  primary: "#2563eb",
-  secondary: "#10b981",
-  tertiary: "#f59e0b",
-  background: "#f3f4f6",
-  border: "#e5e7eb",
-  text: "#1f2937",
-  lightText: "#6b7280",
-};
-
-const mapRawDataToPlayerData = (rawData: any): PlayerData => {
-  console.log('Mapping Raw Data:', rawData); // Debugging step
-
-  const parsedSpeed = parseFloat(rawData["速度(kph)"]?.trim());
-  const parsedSpin = parseInt(rawData["SPIN"]?.trim(), 10);
-
-  // Log issues with parsing
-  if (isNaN(parsedSpeed)) {
-    console.error('Invalid Speed Detected:', rawData["速度(kph)"]);
-  }
-  if (isNaN(parsedSpin)) {
-    console.error('Invalid Spin Detected:', rawData["SPIN"]);
-  }
-
-  return {
-    id: rawData.id || "unknown-id",
-    documentId: rawData.documentId || undefined,
-    date: rawData["日付"] || "unknown-date",
-    speed: isNaN(parsedSpeed) ? 0 : parsedSpeed, // Fallback to 0
-    spin: isNaN(parsedSpin) ? 0 : parsedSpin,   // Fallback to 0
-    trueSpin: parseInt(rawData["TRUE SPIN"]?.trim(), 10) || 0,
-    spinEff: parseFloat(rawData["SPIN EFF."]?.replace("%", "").trim()) || 0,
-    spinDirection: convertSpinDirection(rawData["SPIN DIRECTION"]),
-    verticalMovement: parseFloat(rawData["線の変化量(cm)"]?.trim()) || 0,
-    horizontalMovement: parseFloat(rawData["軸の変化量(cm)"]?.trim()) || 0,
-    strike: rawData["ストライク"] === "はい" ? 1 : 0,
-    releasePoint: parseFloat(rawData["リリースポイントの高さ(m)"]?.trim()) || 0,
-    absorption: rawData.absorption || "unknown",
-  };
-};
-
-const convertSpinDirection = (spinDirection: string): number => {
-  if (!spinDirection.includes("h") || !spinDirection.includes("m")) {
-    return 0; // Default fallback
-  }
-  const [hours, minutes] = spinDirection
-    .replace("h", "")
-    .replace("m", "")
-    .split(":")
-    .map((val) => parseInt(val));
-  return hours * 30 + minutes * 0.5; // Convert hours and minutes to degrees
-};
-
-
-
-// データ型の定義
-type PlayerData = {
-  id: string;
-  documentId?: string;
-  date: string;
-  speed: number;
-  spin: number;
-  trueSpin: number;
-  spinEff: number;
-  spinDirection: number;
-  verticalMovement: number;
-  horizontalMovement: number;
-  strike: number;
-  releasePoint: number;
-  absorption: string;
-};
-
-type SortableField = 'date' | 'speed' | 'spin';
-
-type Player = {
-  id: string;
-  name: string;
-};
+import { useLanguage } from "@/contexts/LanguageContext";
+import Navigation from "@/components/layout/Navigation";
+import FilterSection from "./components/FilterSection";
+import IndividualAnalysis from "./components/IndividualAnalysis";
+import ComparisonGraph from "./components/ComparisonGraph";
+import { Player, PlayerData } from "./types";
+import { mapRawDataToPlayerData } from "./utils/dataHelpers";
+import "./analysis.css";
 
 export default function AnalysisPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showAllPeriod, setShowAllPeriod] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<SortableField>("date");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
-  const [playerData, setPlayerData] = useState<PlayerData[]>([]);
-  const [currentTab, setCurrentTab] = useState<"whole" | "best" | "individual"|"compare">("whole");
-  const [comparePlayers, setComparePlayers] = useState<string[]>([]);
-  const [compareField, setCompareField] = useState<keyof PlayerData | null>(null);
+  const [allPlayerData, setAllPlayerData] = useState<PlayerData[]>([]);
+  const [filteredPlayerData, setFilteredPlayerData] = useState<PlayerData[]>([]);
+  const [currentTab, setCurrentTab] = useState<"individual" | "comparison">("individual");
 
-
-  useEffect(() => {
-    const fetchRawPlayerData = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "players"));
-        const normalizedData = querySnapshot.docs.map((doc) =>
-          mapRawDataToPlayerData(doc.data())
-        );
-        setPlayerData(normalizedData); // Replace this with your existing setter or state logic
-      } catch (error) {
-        console.error("Error fetching player data:", error);
-      }
-    };
-  
-    fetchRawPlayerData();
-  }, []);
-
-  // プレイヤー一覧の取得
+  // Fetch players
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "players"));
-        const playersList = querySnapshot.docs.map(doc => ({
+        const playersCollection = collection(db, "players");
+        const playersSnapshot = await getDocs(playersCollection);
+        const playersList = playersSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().name
-        }));
+          name: doc.data().name,
+        })) as Player[];
         setPlayers(playersList);
       } catch (error) {
         console.error("Error fetching players:", error);
@@ -138,273 +44,73 @@ export default function AnalysisPage() {
     fetchPlayers();
   }, []);
 
-  // プレイヤーデータの取得
+  // Fetch all player data
   useEffect(() => {
     const fetchPlayerData = async () => {
-      if (selectedPlayers.length === 0 && !showAllPeriod) return;
-  
+      if (players.length === 0) return;
+
       try {
-        let data: PlayerData[] = [];
-        const targetPlayers = selectedPlayers.length ? selectedPlayers : players.map(p => p.id);
-  
-        for (const playerId of targetPlayers) {
-          const csvCollectionRef = collection(db, `players/${playerId}/csvData`);
-          const querySnapshot = await getDocs(csvCollectionRef);
-  
-          const playerData = querySnapshot.docs
-            .map(doc => {
-              const rawData = doc.data();
-              // Skip invalid documents
-              if (rawData["速度(kph)"] === "-" || rawData["SPIN"] === "-") {
-                console.log(`Skipping document with invalid data: ${doc.id}`);
-                return null;
-              }
-              // Map raw data to PlayerData
-              return mapRawDataToPlayerData({
-                ...rawData,
-                id: playerId,
-                documentId: doc.id,
-              });
-            })
-            .filter(item => item !== null) as PlayerData[]; // Filter out null values
-  
-          data = [...data, ...playerData];
+        const allData: PlayerData[] = [];
+        for (const player of players) {
+          const playerRef = collection(db, "players", player.id, "csvData");
+          const playerSnapshot = await getDocs(playerRef);
+          const playerDocs = playerSnapshot.docs.map((doc) => ({
+            ...mapRawDataToPlayerData(doc.data()),
+            id: player.id,
+            documentId: doc.id,
+          }));
+          allData.push(...playerDocs);
         }
-  
-        // Filter by date range if required
-        if (!showAllPeriod && startDate && endDate) {
-          data = data.filter(item => {
-            const itemDate = new Date(item.date);
-            return itemDate >= startDate && itemDate <= endDate;
-          });
-        }
-  
-        // Sort data
-        data.sort((a, b) => {
-          const getValue = (item: PlayerData, key: SortableField) => {
-            if (key === 'date') return new Date(item.date).getTime();
-            return key === 'speed' ? item.speed : item.spin;
-          };
-  
-          const aValue = getValue(a, selectedItem);
-          const bValue = getValue(b, selectedItem);
-  
-          return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-        });
-  
-        setPlayerData(data); // Update state with processed data
+        setAllPlayerData(allData);
       } catch (error) {
         console.error("Error fetching player data:", error);
       }
     };
-  
+
     fetchPlayerData();
-  }, [selectedPlayers, showAllPeriod, startDate, endDate, selectedItem, sortOrder, players]);
+  }, [players]);
 
-  // グラフ用のカスタムツールチップ
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip">
-          <p className="tooltip-label">{`選手: ${label}`}</p>
-          {payload.map((pld: any, index: number) => (
-            <p key={index} style={{ color: pld.color }}>
-              {`${pld.name}: ${pld.value.toFixed(2)}`}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+  // Filter data based on date range and selected players
+  useEffect(() => {
+    let filtered = allPlayerData;
 
-  // レーダーチャート用の関数
-  const prepareRadarData = () => {
-    const subjects = ['球速', '回転数', 'TRUE SPIN', 'SPIN EFF', 'ストライク率'];
-    
-    // 各指標の最大値を計算（正規化用）
-    const maxValues = {
-      speed: Math.max(...playerData.map(d => d.speed)),
-      spin: Math.max(...playerData.map(d => d.spin)),
-      trueSpin: Math.max(...playerData.map(d => d.trueSpin)),
-      spinEff: Math.max(...playerData.map(d => d.spinEff)),
-      strike: 1 // ストライク率は0-1なので最大値は1
-    };
-
-    const radarData = subjects.map(subject => {
-      const dataPoint: any = { subject };
-      
-      comparePlayers.forEach(playerId => {
-        const playerStats = playerData.filter(data => data.id === playerId);
-        if (playerStats.length > 0) {
-          let value = 0;
-          switch (subject) {
-            case '球速':
-              value = (playerStats.reduce((sum, item) => sum + item.speed, 0) / playerStats.length) / maxValues.speed * 100;
-              break;
-            case '回転数':
-              value = (playerStats.reduce((sum, item) => sum + item.spin, 0) / playerStats.length) / maxValues.spin * 100;
-              break;
-            case 'TRUE SPIN':
-              value = (playerStats.reduce((sum, item) => sum + item.trueSpin, 0) / playerStats.length) / maxValues.trueSpin * 100;
-              break;
-            case 'SPIN EFF':
-              value = (playerStats.reduce((sum, item) => sum + item.spinEff, 0) / playerStats.length) / maxValues.spinEff * 100;
-              break;
-            case 'ストライク率':
-              value = (playerStats.reduce((sum, item) => sum + item.strike, 0) / playerStats.length) * 100;
-              break;
-          }
-          dataPoint[playerId] = Math.round(value);
-        }
+    // Filter by date range
+    if (!showAllPeriod && startDate && endDate) {
+      filtered = filtered.filter((data) => {
+        const dataDate = new Date(data.date);
+        return dataDate >= startDate && dataDate <= endDate;
       });
-      
-      return dataPoint;
-    });
-
-    return radarData;
-  };
-
-  const getPlayerCompareStats = (playerId: string) => {
-    const playerStats = playerData.filter(data => data.id === playerId);
-    
-    if (playerStats.length === 0) {
-      return {
-        avgSpeed: 0, maxSpeed: 0, avgSpin: 0, maxSpin: 0,
-        avgTrueSpin: 0, avgSpinEff: 0
-      };
     }
 
-    return {
-      avgSpeed: playerStats.reduce((sum, item) => sum + item.speed, 0) / playerStats.length,
-      maxSpeed: Math.max(...playerStats.map(item => item.speed)),
-      avgSpin: playerStats.reduce((sum, item) => sum + item.spin, 0) / playerStats.length,
-      maxSpin: Math.max(...playerStats.map(item => item.spin)),
-      avgTrueSpin: playerStats.reduce((sum, item) => sum + item.trueSpin, 0) / playerStats.length,
-      avgSpinEff: playerStats.reduce((sum, item) => sum + item.spinEff, 0) / playerStats.length,
-    };
+    // Filter by selected player(s) based on current tab
+    if (currentTab === "individual" && selectedPlayer) {
+      filtered = filtered.filter((data) => data.id === selectedPlayer);
+    } else if (currentTab === "comparison" && selectedPlayers.length > 0) {
+      filtered = filtered.filter((data) => selectedPlayers.includes(data.id));
+    }
+
+    setFilteredPlayerData(filtered);
+  }, [allPlayerData, startDate, endDate, showAllPeriod, selectedPlayer, selectedPlayers, currentTab]);
+
+  const handlePlayerSelect = (playerId: string) => {
+    setSelectedPlayer(playerId);
+    setSelectedPlayers([]);
   };
 
-  const prepareCompareData2 = () => {
-    if (!compareField || comparePlayers.length === 0) return [];
-    
-    const data = comparePlayers.map(playerId => {
-      const player = players.find(p => p.id === playerId);
-      const playerStats = playerData.filter(data => data.id === playerId);
-      
-      return {
-        name: player?.name || "Unknown",
-        value: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + (Number(item[compareField]) || 0), 0) / playerStats.length
-          : 0,
-      };
-    });
-  
-    return data;
+  const handlePlayersSelect = (playerIds: string[]) => {
+    setSelectedPlayers(playerIds.slice(0, 5)); // Max 5 players
+    setSelectedPlayer(null);
   };
 
-
-  // 平均値の計算
-  const calculateAverages = () => {
-    const averages = players.map(player => {
-      const playerStats = playerData.filter(data => data.id === player.id);
-      console.log('Player Stats:', player.name, playerStats); // デバッグ用
-      return {
-        name: player.name,
-        avgSpeed: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + Number(item.speed), 0) / playerStats.length
-          : 0,
-        avgSpin: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + Number(item.spin), 0) / playerStats.length
-          : 0
-      };
-    });
-    console.log('Averages:', averages); // デバッグ用
-    return averages;
+  const handleTabChange = (tab: "individual" | "comparison") => {
+    setCurrentTab(tab);
+    if (tab === "individual") {
+      setSelectedPlayers([]);
+    } else {
+      setSelectedPlayer(null);
+    }
   };
 
-  // 最高記録の計算
-  const calculateBest = () => {
-    const best = players.map(player => {
-      const playerStats = playerData.filter(data => data.id.toString() === player.id);
-      return {
-        name: player.name,
-        bestSpeed: playerStats.length ? Math.max(...playerStats.map(item => Number(item.speed))) : 0,
-        bestSpin: playerStats.length ? Math.max(...playerStats.map(item => Number(item.spin))) : 0
-      };
-    });
-    console.log('Best Records:', best); // デバッグ用
-    return best;
-  };
-
-  
-  const fetchPlayerData = async () => {
-    // Fetch data from Firestore or wherever your player data is stored
-    const querySnapshot = await getDocs(collection(db, "players"));
-    const fetchedData: PlayerData[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Assuming the data contains "date", "速度(kph)", and "SPIN"
-      fetchedData.push(mapRawDataToPlayerData(data));
-    });
-    setPlayerData(fetchedData);
-  };
-  // 個人グラフデータの処理
-  const getIndividualData = (playerId: string) => {
-    const filteredData = playerData
-      .filter((data) => data.id === playerId)
-      .map((data) => {
-        // Parse and validate the fields
-        const parsedSpeed = Number(data.speed);
-        const parsedSpin = Number(data.spin);
-        const parsedDate = new Date(data.date);
-  
-        return {
-          date: parsedDate,
-          speed: isNaN(parsedSpeed) ? 0 : parsedSpeed, // Ensure valid speed
-          spin: isNaN(parsedSpin) ? 0 : parsedSpin,   // Ensure valid spin
-        };
-      })
-      .filter((item) => !isNaN(item.speed) && !isNaN(item.spin)); // Filter out invalid entries
-  
-    // Sort the data
-    filteredData.sort((a, b) => {
-      const getValue = (item: typeof filteredData[0], key: SortableField) => {
-        switch (key) {
-          case 'date': return item.date.getTime();
-          case 'speed': return item.speed;
-          case 'spin': return item.spin;
-          default: return 0;
-        }
-      };
-  
-      const aValue = getValue(a, selectedItem);
-      const bValue = getValue(b, selectedItem);
-  
-      // Ascending or Descending order
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-  
-    console.log('Sorted Individual Data:', filteredData); // Debug log
-    return filteredData;
-  };
-  const prepareCompareData = () => {
-    if (!compareField || comparePlayers.length === 0) return [];
-    
-    const data = comparePlayers.map(playerId => {
-      const player = players.find(p => p.id === playerId);
-      const playerStats = playerData.filter(data => data.id === playerId);
-      
-      return {
-        name: player?.name || "Unknown",
-        value: playerStats.length 
-          ? playerStats.reduce((sum, item) => sum + (Number(item[compareField]) || 0), 0) / playerStats.length
-          : "NIL",
-      };
-    });
-  
-    return data;
-  };
   return (
     <>
       <Navigation showProfile={true} showHamburger={true} />
@@ -412,429 +118,56 @@ export default function AnalysisPage() {
       <div className="main-content">
         <div className="RightContent">
           <div className="analysis-container">
-            {/* フィルターセクション */}
-            <div className="filter-section">
-              <div className="date-filter">
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date: Date | null) => setStartDate(date)}
-                  selectsStart
-                  startDate={startDate ?? undefined}
-                  endDate={endDate ?? undefined}
-                  placeholderText="開始日"
-                  disabled={showAllPeriod}
-                  className="date-picker"
-                />
-                <span>~</span>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date: Date | null) => setEndDate(date)}
-                  selectsEnd
-                  startDate={startDate ?? undefined}
-                  endDate={endDate ?? undefined}
-                  placeholderText="終了日"
-                  disabled={showAllPeriod}
-                  className="date-picker"
-                />
-                <label className="period-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={showAllPeriod}
-                    onChange={(e) => setShowAllPeriod(e.target.checked)}
-                  />
-                  <span>全期間</span>
-                </label>
-              </div>
-
-              <div className="sort-filter">
-              <select
-                value={selectedItem}
-                onChange={(e) => setSelectedItem(e.target.value as SortableField)}
-                className="select-box"
-              >
-                  <option value="date">日付</option>
-                  <option value="speed">球速</option>
-                  <option value="spin">SPIN</option>
-                </select>
-
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-                  className="select-box"
+            {/* Tab Navigation */}
+            <div className="tab-section">
+              <div className="tab-buttons">
+                <button
+                  className={`tab-button ${currentTab === "individual" ? "active" : ""}`}
+                  onClick={() => handleTabChange("individual")}
                 >
-                  <option value="asc">昇順</option>
-                  <option value="desc">降順</option>
-                </select>
+                  {t("analysis.tabs.individual")}
+                </button>
+                <button
+                  className={`tab-button ${currentTab === "comparison" ? "active" : ""}`}
+                  onClick={() => handleTabChange("comparison")}
+                >
+                  {t("analysis.tabs.comparison")}
+                </button>
               </div>
-
-              <select
-                multiple
-                value={selectedPlayers}
-                onChange={(e) => setSelectedPlayers(Array.from(e.target.selectedOptions, option => option.value))}
-                className="player-select"
-              >
-                <option value="NIL">NIL</option> {/* Default NIL option */}
-                {players.map(player => (
-                  <option key={player.id} value={player.id}>
-                    {player.name}
-                  </option>
-                ))}
-              </select>
             </div>
 
-            {/* タブ切り替え */}
-            <div className="tab-container">
-              <div className="tabs">
-                {["whole", "best", "individual", "compare"].map((tab) => (
-                  <button
-                    key={tab}
-                    className={`tab-button ${currentTab === tab ? "active" : ""}`}
-                    onClick={() => setCurrentTab(tab as "whole" | "best" | "individual" | "compare")}
-                  >
-                    {tab === "whole"
-                      ? "全体グラフ"
-                      : tab === "best"
-                      ? "ベストグラフ"
-                      : tab === "individual"
-                      ? "個人グラフ"
-                      : "比較グラフ"}
-                  </button>
-                ))}
-              </div>
-            </div>;
+            {/* Filter Section */}
+            <FilterSection
+              startDate={startDate}
+              endDate={endDate}
+              showAllPeriod={showAllPeriod}
+              players={players}
+              selectedPlayer={selectedPlayer}
+              selectedPlayers={selectedPlayers}
+              currentTab={currentTab}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onShowAllPeriodChange={setShowAllPeriod}
+              onPlayerSelect={handlePlayerSelect}
+              onPlayersSelect={handlePlayersSelect}
+            />
 
-{/*
-            
-            <div className="table-container">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>選手名</th>
-                    <th>日付</th>
-                    <th>球速</th>
-                    <th>SPIN</th>
-                    <th>TRUE SPIN</th>
-                    <th>SPIN EFF</th>
-                    <th>SPIN DIRECT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {playerData.map((data, index) => (
-                    <tr key={index}>
-                      <td>{players.find(p => p.id === data.id.toString())?.name}</td>
-                      <td>{data.date}</td>
-                      <td>{data.speed}</td>
-                      <td>{data.spin}</td>
-                      <td>{data.trueSpin}</td>
-                      <td>{data.spinEff}</td>
-                      <td>{data.spinDirection}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-*/}
-            {/* グラフ表示 */}
+            {/* Graph Display */}
             <div className="graphs-container">
-              {currentTab === "whole" && (
-                <div className="graph-section">
-                  <h3 className="graph-title">全体グラフ</h3>
-                  <div className="graph-grid">
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={calculateAverages()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis 
-                            yAxisId="speed"
-                            orientation="left"
-                            stroke={COLORS.primary}
-                            domain={['auto', 'auto']}
-                          />
-                          <YAxis 
-                            yAxisId="spin"
-                            orientation="right"
-                            stroke={COLORS.secondary}
-                            domain={['auto', 'auto']}
-                          />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Line 
-                            yAxisId="speed"
-                            type="monotone" 
-                            dataKey="avgSpeed" 
-                            stroke={COLORS.primary} 
-                            name="平均球速"
-                            dot={true}
-                          />
-                          <Line 
-                            yAxisId="spin"
-                            type="monotone" 
-                            dataKey="avgSpin" 
-                            stroke={COLORS.secondary} 
-                            name="平均SPIN"
-                            dot={true}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={calculateAverages()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis stroke="#666" />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Bar dataKey="avgSpeed" fill={COLORS.primary} name="平均球速" />
-                          <Bar dataKey="avgSpin" fill={COLORS.secondary} name="平均SPIN" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
+              {currentTab === "individual" && (
+                <IndividualAnalysis
+                  selectedPlayer={selectedPlayer}
+                  players={players}
+                  playerData={filteredPlayerData}
+                />
               )}
 
-              {currentTab === "best" && (
-                <div className="graph-section">
-                  <h3 className="graph-title">最高記録グラフ</h3>
-                  <div className="graph-grid">
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={calculateBest()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis 
-                            yAxisId="speed"
-                            orientation="left"
-                            stroke={COLORS.primary}
-                            domain={['auto', 'auto']}
-                          />
-                          <YAxis 
-                            yAxisId="spin"
-                            orientation="right"
-                            stroke={COLORS.secondary}
-                            domain={['auto', 'auto']}
-                          />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Line 
-                            yAxisId="speed"
-                            type="monotone" 
-                            dataKey="bestSpeed" 
-                            stroke={COLORS.primary} 
-                            name="最高球速"
-                            dot={true}
-                          />
-                          <Line 
-                            yAxisId="spin"
-                            type="monotone" 
-                            dataKey="bestSpin" 
-                            stroke={COLORS.secondary} 
-                            name="最高SPIN"
-                            dot={true}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="graph-item">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={calculateBest()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis stroke="#666" />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend />
-                          <Bar dataKey="bestSpeed" fill={COLORS.primary} name="最高球速" />
-                          <Bar dataKey="bestSpin" fill={COLORS.secondary} name="最高SPIN" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-                  {currentTab === "individual" && selectedPlayers.length > 0 && (
-                    <div className="graph-section">
-                      <h3 className="graph-title">個人グラフ</h3>
-                      {selectedPlayers.map((playerId) => {
-                        const playerName = players.find((p) => p.id === playerId)?.name;
-                        const individualData = getIndividualData(playerId);
-
-                        return (
-                            <div key={playerId} className="individual-graph">
-                              <h4>{playerName} - Pitch Speed vs. Spin</h4>
-                              <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={individualData}>
-                                  <CartesianGrid strokeDasharray="3 3" />
-                                  <XAxis
-                                    dataKey="speed"
-                                    label={{ value: "Speed (kph)", position: "insideBottomRight", offset: 0 }}
-                                    stroke={COLORS.primary}
-                                    type="number"
-                                    domain={["dataMin", "dataMax"]}
-                                  />
-                                  <YAxis
-                                    label={{ value: "Spin", angle: -90, position: "insideLeft" }}
-                                    stroke={COLORS.secondary}
-                                    type="number"
-                                    domain={["dataMin", "dataMax"]}
-                                  />
-                                  <Tooltip content={<CustomTooltip />} />
-                                  <Legend />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="spin"
-                                    stroke={COLORS.secondary}
-                                    name="Spin"
-                                    dot={true}
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          );
-                      })}
-                    </div>
-                  )}
-
-                  {currentTab === "compare" && (
-                    <div className="graph-section">
-                      <h3 className="graph-title">選手比較</h3>
-                      
-                      {/* Player selection */}
-                      <div className="compare-controls">
-                        <select
-                          multiple
-                          value={comparePlayers}
-                          onChange={(e) => setComparePlayers(Array.from(e.target.selectedOptions, option => option.value))}
-                          className="player-select"
-                        >
-                          {players.map(player => (
-                            <option key={player.id} value={player.id}>
-                              {player.name}
-                            </option>
-                          ))}
-                        </select>
-                        
-                        {/* Field selection */}
-                        <select
-                          value={compareField ?? ""}
-                          onChange={(e) => setCompareField(e.target.value as keyof PlayerData)}
-                          className="field-select"
-                        >
-                          <option value="">データを選択してください</option>
-                          <option value="speed">球速</option>
-                          <option value="spin">SPIN</option>
-                          <option value="trueSpin">TRUE SPIN</option>
-                          <option value="spinEff">SPIN EFF</option>
-                          <option value="spinDirection">SPIN DIRECTION</option>
-                        </select>
-                      </div>
-
-                     {/* Graph */}
-                      <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={prepareCompareData()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" stroke="#666" />
-                          <YAxis stroke="#666" />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="value" fill="#82ca9d" name={compareField?.toUpperCase()} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                      {/* 比較グラフ - レーダーチャート */}
-              {currentTab === "compare" && (
-                <div className="graph-section">
-                  <h3 className="graph-title">選手比較 (レーダーチャート)</h3>
-                  
-                  {/* Player selection */}
-                  <div className="compare-controls">
-                    <select
-                      multiple
-                      value={comparePlayers}
-                      onChange={(e) => setComparePlayers(Array.from(e.target.selectedOptions, option => option.value))}
-                      className="player-select"
-                    >
-                      {players.map(player => (
-                        <option key={player.id} value={player.id}>
-                          {player.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* レーダーチャート */}
-                  {comparePlayers.length > 0 && (
-                    <div className="radar-chart-container">
-                      <ResponsiveContainer width="100%" height={500}>
-                        <RadarChart data={prepareRadarData()}>
-                          <PolarGrid />
-                          <PolarAngleAxis dataKey="subject" />
-                          <PolarRadiusAxis 
-                            angle={0} 
-                            domain={[0, 100]} 
-                            tick={false}
-                          />
-                          <Tooltip />
-                          <Legend />
-                          {comparePlayers.map((playerId, index) => {
-                            const playerName = players.find(p => p.id === playerId)?.name;
-                            const colors = [COLORS.primary, COLORS.secondary, COLORS.tertiary, '#ff7300', '#00ff73'];
-                            return (
-                              <Radar
-                                key={playerId}
-                                name={playerName}
-                                dataKey={playerId}
-                                stroke={colors[index % colors.length]}
-                                fill={colors[index % colors.length]}
-                                fillOpacity={0.1}
-                                strokeWidth={2}
-                              />
-                            );
-                          })}
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-
-                  {/* 詳細比較テーブル */}
-                  {comparePlayers.length > 0 && (
-                    <div className="compare-table-container">
-                      <h4>詳細比較</h4>
-                      <table className="compare-table">
-                        <thead>
-                          <tr>
-                            <th>選手名</th>
-                            <th>平均球速</th>
-                            <th>最高球速</th>
-                            <th>平均回転数</th>
-                            <th>最高回転数</th>
-                            <th>平均TRUE SPIN</th>
-                            <th>平均SPIN EFF</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {comparePlayers.map(playerId => {
-                            const playerStats = getPlayerCompareStats(playerId);
-                            return (
-                              <tr key={playerId}>
-                                <td>{players.find(p => p.id === playerId)?.name}</td>
-                                <td>{playerStats.avgSpeed.toFixed(1)} km/h</td>
-                                <td>{playerStats.maxSpeed} km/h</td>
-                                <td>{playerStats.avgSpin.toFixed(0)}</td>
-                                <td>{playerStats.maxSpin}</td>
-                                <td>{playerStats.avgTrueSpin.toFixed(0)}</td>
-                                <td>{playerStats.avgSpinEff.toFixed(1)}%</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+              {currentTab === "comparison" && (
+                <ComparisonGraph
+                  players={players}
+                  playerData={filteredPlayerData}
+                  selectedPlayers={selectedPlayers}
+                />
               )}
             </div>
           </div>

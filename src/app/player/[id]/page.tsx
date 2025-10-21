@@ -15,6 +15,7 @@ import { db } from "@/lib/firebase";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import Navigation from "@/components/layout/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import styles from "./PlayerPage.module.css";
 
 type Player = {
@@ -33,6 +34,7 @@ type FileRow = {
 export default function PlayerPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [fileData, setFileData] = useState<FileRow[]>([]);
@@ -130,11 +132,11 @@ export default function PlayerPage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t("player.loading")}</div>;
   }
 
   if (!player) {
-    return <div>No player found.</div>;
+    return <div>{t("player.notFound")}</div>;
   }
 
   return (
@@ -143,9 +145,9 @@ export default function PlayerPage() {
 
       <div className={styles.container}>
         <h1 className={styles.heading}>{player.name}</h1>
-        <p className={styles.info}>Grade: {player.grade}</p>
-        <p className={styles.info}>Height: {player.height} cm</p>
-        <p className={styles.info}>Weight: {player.weight} kg</p>
+        <p className={styles.info}>{t("home.grade")}: {player.grade}</p>
+        <p className={styles.info}>{t("home.height")}: {player.height} {t("common.cm")}</p>
+        <p className={styles.info}>{t("home.weight")}: {player.weight} {t("common.kg")}</p>
 
         {player.imageURL && (
           <Image
@@ -158,7 +160,7 @@ export default function PlayerPage() {
         )}
 
         <button onClick={() => router.push("/home")} className={styles.button}>
-          Back to Home
+          {t("player.backToHome")}
         </button>
 
         <input
@@ -168,7 +170,7 @@ export default function PlayerPage() {
           className={styles.fileInput}
         />
         <button onClick={handleDataUpload} className={styles.button}>
-          Upload CSV Data
+          {t("player.uploadCSV")}
         </button>
 
         {fileData.length > 0 && (
@@ -199,7 +201,7 @@ export default function PlayerPage() {
         <button
               onClick={handleRedirect}
               className={styles.button}>
-          View Uploaded Data
+          {t("player.viewData")}
         </button>
       </div>
     </>

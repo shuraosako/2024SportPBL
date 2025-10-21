@@ -42,9 +42,10 @@
 /* Player Cards Section */
 .player-cards-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
   margin-top: 20px;
+  width: 100%;
 }
 
 .player-card {
@@ -54,6 +55,13 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   background-color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .player-photo {
@@ -155,6 +163,14 @@
   flex: 1;
   background-color: #fafafa;
   padding: 40px;
+}
+
+.RightContenthome {
+  flex: 1;
+  width: 100%;
+  background-color: #fafafa;
+  padding: 40px;
+  box-sizing: border-box;
 }
 
 .dropdown-container {

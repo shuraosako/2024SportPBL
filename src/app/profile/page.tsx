@@ -9,11 +9,13 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider } from "firebase/auth";
 import Navigation from "@/components/layout/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import "./profile.css";
 import "../home/home.css";
 
 export default function ProfilePage({ params }: { params: { uid: string } }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -175,18 +177,18 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       <div className="main-content">
         <div className="RightContent">
           <div className="profile-page">
-            <h1 className="profile-title">Profile Page</h1>
+            <h1 className="profile-title">{t("profile.title")}</h1>
 
-            {isLoading && <div className="loading-spinner">Saving...</div>}
+            {isLoading && <div className="loading-spinner">{t("profile.saving")}</div>}
 
             <div className="profile-section">
               {currentImageURL && (
                 <div className="profile-current-image">
-                  <Image 
-                    src={currentImageURL} 
-                    alt="Current Profile" 
-                    className="profile-image-preview" 
-                    width={200} 
+                  <Image
+                    src={currentImageURL}
+                    alt="Current Profile"
+                    className="profile-image-preview"
+                    width={200}
                     height={200}
                   />
                 </div>
@@ -194,7 +196,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             </div>
 
             <div className="profile-section">
-              <label className="profile-label">Phone Number:</label>
+              <label className="profile-label">{t("profile.phoneNumber")}:</label>
               <input
                 type="tel"
                 className="profile-input"
@@ -203,13 +205,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                 placeholder="+1234567890"
               />
               <button className="profile-button" onClick={handlePhoneNumberSignIn}>
-                Send OTP
+                {t("profile.sendOTP")}
               </button>
             </div>
 
             {verificationId && (
               <div className="profile-section">
-                <label className="profile-label">OTP:</label>
+                <label className="profile-label">{t("profile.otp")}:</label>
                 <input
                   type="text"
                   className="profile-input"
@@ -218,13 +220,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                   placeholder="Enter OTP"
                 />
                 <button className="profile-button" onClick={handleVerifyOtp}>
-                  Verify OTP
+                  {t("profile.verifyOTP")}
                 </button>
               </div>
             )}
 
             <div className="profile-section">
-              <label className="profile-label">New Password:</label>
+              <label className="profile-label">{t("profile.newPassword")}:</label>
               <input
                 type="password"
                 className="profile-input"
@@ -234,7 +236,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             </div>
 
             <div className="profile-section">
-              <label className="profile-label">New Username:</label>
+              <label className="profile-label">{t("profile.newUsername")}:</label>
               <input
                 type="text"
                 className="profile-input"
@@ -244,7 +246,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
             </div>
 
             <div className="profile-section">
-              <label className="profile-label">Upload New Profile Photo:</label>
+              <label className="profile-label">{t("profile.uploadPhoto")}:</label>
               {previewImage && (
                 <Image
                   src={previewImage}
@@ -264,7 +266,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
             <div className="profile-section">
               <button className="profile-button" onClick={handleSaveChanges} disabled={isLoading}>
-                Save Changes
+                {t("profile.saveChanges")}
               </button>
             </div>
 

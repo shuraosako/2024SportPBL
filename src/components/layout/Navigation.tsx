@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitch from "@/components/LanguageSwitch";
 import styles from "./Navigation.module.css";
 
 interface NavigationProps {
@@ -16,33 +18,38 @@ interface NavigationProps {
 
 export default function Navigation({ showProfile = false, showHamburger = false }: NavigationProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (!showProfile) return;
-
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+        setIsAuthenticated(true);
+        if (showProfile) {
+          try {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
 
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            const username = data?.username || user.email;
-            setUserName(username);
-            setProfileImage(data?.profileImageUrl || null);
-          } else {
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+              const username = data?.username || user.email;
+              setUserName(username);
+              setProfileImage(data?.profileImageUrl || null);
+            } else {
+              setUserName(user.email);
+            }
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
             setUserName(user.email);
           }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserName(user.email);
         }
+      } else {
+        setIsAuthenticated(false);
       }
     });
 
@@ -71,10 +78,10 @@ export default function Navigation({ showProfile = false, showHamburger = false 
             </div>
           )}
           <div className={styles.logo}>
-            <Link href="/">SportsPBL</Link>
+            <Link href="/">{t("app.title")}</Link>
           </div>
           <div className={styles.headerRight}>
-            {showProfile && (
+            {showProfile && isAuthenticated ? (
               <div className={styles.profileSection} onClick={toggleProfilePopup}>
                 <div className={styles.profileInfo}>
                   <Image
@@ -89,17 +96,18 @@ export default function Navigation({ showProfile = false, showHamburger = false 
                 {isProfileOpen && (
                   <div className={styles.profilePopup}>
                     <p>{userName}</p>
-                    <button onClick={navigateToProfile}>Profile</button>
-                    <button onClick={handleLogout}>Logout</button>
+                    <button onClick={navigateToProfile}>{t("nav.profile")}</button>
+                    <button onClick={handleLogout}>{t("nav.logout")}</button>
                   </div>
                 )}
               </div>
+            ) : (
+              <ul>
+                <li><Link href="/login">{t("nav.login")}</Link></li>
+                <li><Link href="/">{t("nav.top")}</Link></li>
+              </ul>
             )}
-            <ul>
-              <li><Link href="/login">LOGIN</Link></li>
-              <li><Link href="/">TOP</Link></li>
-              <li><Link href="/setting">Settings</Link></li>
-            </ul>
+            <LanguageSwitch />
           </div>
         </div>
       </header>
@@ -108,16 +116,16 @@ export default function Navigation({ showProfile = false, showHamburger = false 
         <div className={`${styles.sidebar} ${isMenuOpen ? styles.sidebarOpen : ""}`}>
           <nav className={styles.sidebarNav}>
             <Link href="/home" onClick={() => setIsMenuOpen(false)}>
-              <div className={styles.navItem}>Home</div>
+              <div className={styles.navItem}>{t("nav.home")}</div>
             </Link>
             <Link href="/analysis" onClick={() => setIsMenuOpen(false)}>
-              <div className={styles.navItem}>Analysis</div>
+              <div className={styles.navItem}>{t("nav.analysis")}</div>
             </Link>
             <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
-              <div className={styles.navItem}>Profile</div>
+              <div className={styles.navItem}>{t("nav.profile")}</div>
             </Link>
             <Link href="/setting" onClick={() => setIsMenuOpen(false)}>
-              <div className={styles.navItem}>Settings</div>
+              <div className={styles.navItem}>{t("nav.settings")}</div>
             </Link>
           </nav>
         </div>

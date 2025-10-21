@@ -133,17 +133,113 @@
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     min-height: 300px;
+    margin-bottom: 1.5rem;
   }
-  
-  .individual-graph {
-    margin-bottom: 2rem;
-  }
-  
-  .individual-graph h4 {
+
+  .chart-subtitle {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
     color: #1f2937;
+  }
+
+  .statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-size: 1.125rem;
+  }
+
+  .player-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .player-selection label {
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .player-select {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .player-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .player-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .player-checkbox input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  .player-checkbox input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .tab-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-buttons {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .comparison-table {
+    margin-top: 2rem;
+  }
+
+  .comparison-table h4 {
+    margin-bottom: 1rem;
   }
   
   .custom-tooltip {

@@ -6,11 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Navigation from "@/components/layout/Navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import styles from "./DataTablePage.module.css";
 
 type UploadedRow = Record<string, any>;
 
 function DataTableContent() {
+ const { t } = useLanguage();
  const searchParams = useSearchParams();
  const playerId = searchParams.get("playerId");
  const [uploadedData, setUploadedData] = useState<UploadedRow[]>([]);
@@ -61,18 +63,18 @@ function DataTableContent() {
  });
 
  if (loading) {
-   return <p className={styles.message}>Loading...</p>;
+   return <p className={styles.message}>{t("dataTable.loading")}</p>;
  }
 
  if (!uploadedData || uploadedData.length === 0) {
-   return <p className={styles.message}>No data available.</p>;
+   return <p className={styles.message}>{t("dataTable.noData")}</p>;
  }
 
  return (
    <>
      <Navigation showProfile={true} showHamburger={true} />
      <div className={styles.container}>
-       <h1 className={styles.heading}>Uploaded Data</h1>
+       <h1 className={styles.heading}>{t("dataTable.title")}</h1>
      <div className={styles.tableContainer}>
        <table className={styles.table}>
          <thead>
@@ -102,9 +104,14 @@ function DataTableContent() {
  );
 }
 
+function LoadingFallback() {
+  const { t } = useLanguage();
+  return <p className={styles.message}>{t("dataTable.loading")}</p>;
+}
+
 export default function DataTable() {
  return (
-   <Suspense fallback={<p className={styles.message}>Loading...</p>}>
+   <Suspense fallback={<LoadingFallback />}>
      <DataTableContent />
    </Suspense>
  );

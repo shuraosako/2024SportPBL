@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import "./home.css";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { collection, getDocs } from "firebase/firestore";
@@ -12,9 +11,11 @@ import Image from "next/image";
 import Navigation from "@/components/layout/Navigation";
 import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
@@ -97,6 +98,10 @@ export default function Home() {
     router.push("/create_player");
   };
 
+  const handlePlayerClick = (playerId: string) => {
+    router.push(`/player/${playerId}`);
+  };
+
   return (
     <>
       <Navigation showProfile={true} showHamburger={true} />
@@ -109,16 +114,16 @@ export default function Home() {
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
               dateFormat="dd/MM/yyyy"
-              placeholderText="Select a date"
+              placeholderText={t("home.selectDate")}
               className="dropdown-item"
             />
- 
+
             <div className="name-autocomplete">
               <input
                 type="text"
                 value={searchName}
                 onChange={(e) => handleNameInputChange(e.target.value)}
-                placeholder="Search by name"
+                placeholder={t("home.searchByName")}
                 className="dropdown-item"
               />
               {nameSuggestions.length > 0 && (
@@ -131,26 +136,26 @@ export default function Home() {
                 </ul>
               )}
             </div>
- 
+
             <select
               value={searchGrade}
               onChange={(e) => setSearchGrade(e.target.value)}
               className="dropdown-item"
             >
-              <option value="">All Grades</option>
+              <option value="">{t("home.allGrades")}</option>
               {grades.map((grade, index) => (
                 <option key={index} value={grade}>
                   {grade}
                 </option>
               ))}
             </select>
-            
+
             <div className="filter_button">
 
-            <button onClick={handleFilter}>Filter</button>
+            <button onClick={handleFilter}>{t("home.filter")}</button>
             </div>
             <div className="new_player">
-            <button onClick={handleAddNewPlayer}>New Player</button>
+            <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
             </div>
           </div>
  
@@ -158,7 +163,11 @@ export default function Home() {
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
-                <Link key={player.id} href={`/player/${player.id}`} className="player-card">
+                <div
+                  key={player.id}
+                  className="player-card"
+                  onClick={() => handlePlayerClick(player.id)}
+                >
                   {player.imageURL && (
                     <Image
                       src={player.imageURL}
@@ -169,17 +178,17 @@ export default function Home() {
                     />
                   )}
                   <h3>{player.name}</h3>
-                  <p>学年: {player.grade}</p>
-                  <p>身長: {player.height} cm</p>
-                  <p>体重: {player.weight} kg</p>
-                  <p>最終更新日: {formatFirebaseDate(player.creationDate)}</p>
-                  <p>最高球速/直近の球速:</p>
-                  <p>得意球種:</p>
+                  <p>{t("home.grade")}: {player.grade}</p>
+                  <p>{t("home.height")}: {player.height} {t("common.cm")}</p>
+                  <p>{t("home.weight")}: {player.weight} {t("common.kg")}</p>
+                  <p>{t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}</p>
+                  <p>{t("home.maxSpeed")}:</p>
+                  <p>{t("home.favoriteType")}:</p>
 
-                </Link>
+                </div>
               ))
             ) : (
-              <p>No players found. Adjust your filters or add a new player.</p>
+              <p>{t("home.noPlayers")}</p>
             )}
           </div>
         </div>
