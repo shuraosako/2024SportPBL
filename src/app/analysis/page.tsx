@@ -7,11 +7,8 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./analysis.css";
-import Link from "next/link";
-import Image from "next/image";
+import Navigation from "@/components/Navigation";
 import { useRouter } from "next/navigation";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 
 // 色の定義
 const COLORS = {
@@ -95,10 +92,6 @@ type Player = {
 
 export default function AnalysisPage() {
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showAllPeriod, setShowAllPeriod] = useState(true);
@@ -127,28 +120,6 @@ export default function AnalysisPage() {
   
     fetchRawPlayerData();
   }, []);
-
-  // プロフィール情報取得
-  useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUserName(user.email);
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setProfileImage(data?.profileImageUrl || null);
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
-      } else {
-        router.push("/login");
-      }
-    });
-  }, [router]);
 
   // プレイヤー一覧の取得
   useEffect(() => {
@@ -229,15 +200,6 @@ export default function AnalysisPage() {
   
     fetchPlayerData();
   }, [selectedPlayers, showAllPeriod, startDate, endDate, selectedItem, sortOrder, players]);
-  
-
-  const toggleProfilePopup = () => {
-    setIsProfileOpen(!isProfileOpen);
-  };
-
-  const navigateToProfile = () => {
-    router.push("/profile");
-  };
 
   // グラフ用のカスタムツールチップ
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -445,54 +407,9 @@ export default function AnalysisPage() {
   };
   return (
     <>
-      <header>
-        <ul className="header-container">
-          <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </li>
-          <li className="logo"><Link href="/home"></Link>SportsPBL</li>
-          <div className="header-right">
-            <li className="profile-section" onClick={toggleProfilePopup}>
-              <Image
-                src={profileImage || "/default-profile.png"}
-                alt="Profile"
-                className="profile-image"
-                width={40}
-                height={40}
-              />
-              {isProfileOpen && (
-                <div className="profile-popup">
-                  <p>{userName}</p>
-                  <button onClick={navigateToProfile}>Profile</button>
-                  <button onClick={() => router.push("/login")}>Logout</button>
-                </div>
-              )}
-            </li>
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="/">TOP</Link></li>
-            <li><Link href="/setting">Settings</Link></li>
-          </div>
-        </ul>
-      </header>
-      <div className="header-underline"></div>
+      <Navigation showProfile={true} showHamburger={true} />
 
       <div className="main-content">
-        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
-          <div className="Selection">
-            <Link href="/home">Home</Link>
-            <div className="kai"></div>
-            <Link href="/analysis">Analysis</Link>
-            <div className="kai"></div>
-            <Link href="/profile">Profile</Link>
-            <div className="kai"></div>
-            <Link href="">Settings</Link>
-            <div className="kai"></div>
-            <Link href="">Rapsodo</Link>
-            <div className="kai"></div>
-            <Link href="/home">Home</Link>
-          </div>
-        </div>
-
         <div className="RightContent">
           <div className="analysis-container">
             {/* フィルターセクション */}

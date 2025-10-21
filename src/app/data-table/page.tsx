@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import Navigation from "@/components/Navigation";
 import styles from "./DataTablePage.module.css";
 
 type UploadedRow = Record<string, any>;
@@ -68,8 +69,10 @@ function DataTableContent() {
  }
 
  return (
-   <div className={styles.container}>
-     <h1 className={styles.heading}>Uploaded Data</h1>
+   <>
+     <Navigation showProfile={true} showHamburger={true} />
+     <div className={styles.container}>
+       <h1 className={styles.heading}>Uploaded Data</h1>
      <div className={styles.tableContainer}>
        <table className={styles.table}>
          <thead>
@@ -95,6 +98,7 @@ function DataTableContent() {
        </table>
      </div>
    </div>
+   </>
  );
 }
 

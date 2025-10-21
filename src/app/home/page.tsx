@@ -1,17 +1,15 @@
 "use client";
-// change
- 
+
 import { useState, useEffect } from "react";
 import "./home.css";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db,} from "@/lib/firebase";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import Navigation from "@/components/Navigation";
  
 // Define the Player type with imageURL and creationDate
 type Player = {
@@ -26,7 +24,6 @@ type Player = {
  
 export default function Home() {
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
@@ -35,9 +32,6 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // For profile pop-up
-  const [profileImage, setProfileImage] = useState<string | null>(null); // User's profile image
-  const [userName, setUserName] = useState<string | null>(null); // User's name or email
  
   // Fetch players from Firestore
   useEffect(() => {
@@ -64,44 +58,7 @@ export default function Home() {
  
     fetchPlayers();
   }, []);
- 
-  // Fetch the logged-in user's profile photo
-  useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("User UID: ", user.uid); // Debugging
- 
-        try {
-          const userDocRef = doc(db, "users", user.uid); // Path to Firestore document
-          const userDoc = await getDoc(userDocRef);
- 
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            console.log("User Document Data: ", data);
- 
-            // Fetch and set the username if available, fallback to email otherwise
-            const username = data?.username || user.email;
-            setUserName(username);
- 
-            // Fetch profile image
-            const profileImageUrl = data?.profileImageUrl || null;
-            setProfileImage(profileImageUrl);
-          } else {
-            console.log("User document does not exist.");
-            setUserName(user.email); // Fallback to email
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserName(user.email); // Fallback to email
-        }
-      } else {
-        router.push("/login"); // Redirect to login if not authenticated
-      }
-    });
-  }, [router]);
- 
- 
+
   const formatCreationDate = (timestamp?: { seconds: number; nanoseconds: number }) => {
     return timestamp
       ? new Date(timestamp.seconds * 1000).toLocaleDateString("en-GB") // Format as DD/MM/YYYY
@@ -154,69 +111,12 @@ export default function Home() {
   const handleAddNewPlayer = () => {
     router.push("/create_player");
   };
- 
-  const toggleProfilePopup = () => {
-    setIsProfileOpen(!isProfileOpen);
-  };
- 
-  const navigateToProfile = () => {
-    router.push("/profile");
-  };
- 
+
   return (
     <>
-      <header>
-        <div className="header-container">
-          <div className="logo">SportsPBL</div>
-          <div className="header-right">
-            <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              &#9776;
-            </li>
-            {/* Profile Section */}
-            <li className="profile-section" onClick={toggleProfilePopup}>
-              <div className="profile-info">
-                <Image
-                  src={profileImage || "/default-profile.png"} // Default profile image if not available
-                  alt="Profile"
-                  className="profile-image"
-                  width={40}
-                  height={40}
-                />
-                <span className="username">{userName || "Guest"}</span> {/* Show username */}
-              </div>
-              {isProfileOpen && (
-                <div className="profile-popup">
-                  <p>{userName}</p>
-                  <button onClick={navigateToProfile}>Profile</button>
-                  <button onClick={() => router.push("/login")}>Logout</button>
-                </div>
-              )}
-            </li>
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="/">TOP</Link></li>
-            <li><Link href="/setting">Settings</Link></li>
-          </div>
-        </div>
-      </header>
-      <div className="header-underline"></div>
- 
+      <Navigation showProfile={true} showHamburger={true} />
+
       <div className="main-content">
-        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
-          <div className="Selection">
-            <Link href="/home">Home</Link>
-            <div className="kai"></div>
-            <Link href="/analysis">Analysis</Link>
-            <div className="kai"></div>
-            <Link href="/profile">Profile</Link>
-            <div className="kai"></div>
-            <Link href="">Settings</Link>
-            <div className="kai"></div>
-            <Link href="">Rapsodo</Link>
-            <div className="kai"></div>
-            <Link href="/home">Home</Link>
-          </div>
-        </div>
- 
         <div className="RightContenthome">
           {/* Filters */}
           <div className="dropdown-container">
