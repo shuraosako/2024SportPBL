@@ -861,7 +861,7 @@ export default function AnalysisPage() {
                           <Legend />
                           {comparePlayers.map((playerId, index) => {
                             const playerName = players.find(p => p.id === playerId)?.name;
-                            const colors = [COLORS.primary, COLORS.secondary, COLORS.accent, '#ff7300', '#00ff73'];
+                            const colors = [COLORS.primary, COLORS.secondary, COLORS.tertiary, '#ff7300', '#00ff73'];
                             return (
                               <Radar
                                 key={playerId}
