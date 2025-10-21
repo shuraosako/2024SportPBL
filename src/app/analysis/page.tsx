@@ -106,7 +106,7 @@ export default function AnalysisPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [playerData, setPlayerData] = useState<PlayerData[]>([]);
-  const [currentTab, setCurrentTab] = useState<"average" | "best" | "individual"|"compare">("average");
+  const [currentTab, setCurrentTab] = useState<"whole" | "best" | "individual"|"compare">("whole");
   const [comparePlayers, setComparePlayers] = useState<string[]>([]);
   const [compareField, setCompareField] = useState<keyof PlayerData | null>(null);
 
@@ -565,11 +565,11 @@ export default function AnalysisPage() {
             {/* タブ切り替え */}
             <div className="tab-container">
               <div className="tabs">
-                {["average", "best", "individual", "compare"].map((tab) => (
+                {["whole", "best", "individual", "compare"].map((tab) => (
                   <button
                     key={tab}
                     className={`tab-button ${currentTab === tab ? "active" : ""}`}
-                    onClick={() => setCurrentTab(tab as "average" | "best" | "individual" | "compare")}
+                    onClick={() => setCurrentTab(tab as "whole" | "best" | "individual" | "compare")}
                   >
                     {tab === "average"
                       ? "平均グラフ"
@@ -811,7 +811,7 @@ export default function AnalysisPage() {
                         </select>
                       </div>
 
-                      {/* Graph */}
+                     {/* Graph */}
                       <ResponsiveContainer width="100%" height={400}>
                         <BarChart data={prepareCompareData()}>
                           <CartesianGrid strokeDasharray="3 3" />
