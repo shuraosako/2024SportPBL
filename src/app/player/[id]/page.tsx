@@ -11,9 +11,10 @@ import {
   serverTimestamp,
   getDocs,
 } from "firebase/firestore";
-import { db,} from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import Navigation from "@/components/Navigation";
 import styles from "./PlayerPage.module.css";
 
 type Player = {
@@ -137,66 +138,70 @@ export default function PlayerPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.heading}>{player.name}</h1>
-      <p className={styles.info}>Grade: {player.grade}</p>
-      <p className={styles.info}>Height: {player.height} cm</p>
-      <p className={styles.info}>Weight: {player.weight} kg</p>
+    <>
+      <Navigation showProfile={true} showHamburger={true} />
 
-      {player.imageURL && (
-        <Image
-          src={player.imageURL}
-          alt={`${player.name}'s profile`}
-          className={styles.profilePicture}
-          width={300}
-          height={300}
+      <div className={styles.container}>
+        <h1 className={styles.heading}>{player.name}</h1>
+        <p className={styles.info}>Grade: {player.grade}</p>
+        <p className={styles.info}>Height: {player.height} cm</p>
+        <p className={styles.info}>Weight: {player.weight} kg</p>
+
+        {player.imageURL && (
+          <Image
+            src={player.imageURL}
+            alt={`${player.name}'s profile`}
+            className={styles.profilePicture}
+            width={300}
+            height={300}
+          />
+        )}
+
+        <button onClick={() => router.push("/home")} className={styles.button}>
+          Back to Home
+        </button>
+
+        <input
+          type="file"
+          accept=".csv, .xlsx"
+          onChange={handleFileUpload}
+          className={styles.fileInput}
         />
-      )}
+        <button onClick={handleDataUpload} className={styles.button}>
+          Upload CSV Data
+        </button>
 
-      <button onClick={() => router.push("/home")} className={styles.button}>
-        Back to Home
-      </button>
-
-      <input
-        type="file"
-        accept=".csv, .xlsx"
-        onChange={handleFileUpload}
-        className={styles.fileInput}
-      />
-      <button onClick={handleDataUpload} className={styles.button}>
-        Upload CSV Data
-      </button>
-
-      {fileData.length > 0 && (
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                {Object.keys(fileData[0]).map((key) => (
-                  <th key={key}>{key}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {fileData.map((row, index) => (
-                <tr key={index}>
-                  {Object.entries(row).map(([key, value], i) => (
-                    <td key={`${index}-${key}`}>
-                      {value !== null ? String(value) : ""}
-                    </td>
+        {fileData.length > 0 && (
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  {Object.keys(fileData[0]).map((key) => (
+                    <th key={key}>{key}</th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {fileData.map((row, index) => (
+                  <tr key={index}>
+                    {Object.entries(row).map(([key, value], i) => (
+                      <td key={`${index}-${key}`}>
+                        {value !== null ? String(value) : ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      <button 
-            onClick={handleRedirect} 
-            className={styles.button}>
-        View Uploaded Data
-      </button>
-    </div>
+        <button
+              onClick={handleRedirect}
+              className={styles.button}>
+          View Uploaded Data
+        </button>
+      </div>
+    </>
   );
 }

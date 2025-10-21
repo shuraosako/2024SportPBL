@@ -8,9 +8,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider } from "firebase/auth";
+import Navigation from "@/components/Navigation";
 import "./profile.css";
 import "../home/home.css";
-import Link from "next/link";
 
 export default function ProfilePage({ params }: { params: { uid: string } }) {
   const router = useRouter();
@@ -170,57 +170,9 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
   return (
     <>
-      <header>
-        <div className="header-container">
-          <div className="logo">SportsPBL</div>
-          <div className="header-right">
-            <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              &#9776;
-            </li>
-            <li className="profile-section" onClick={toggleProfilePopup}>
-              <div className="profile-info">
-                <Image
-                  src={currentImageURL || "/default-profile.png"}
-                  alt="Profile"
-                  className="profile-image"
-                  width={40}
-                  height={40}
-                />
-                <span className="username">{user?.email || "Guest"}</span>
-              </div>
-              {isProfileOpen && (
-                <div className="profile-popup">
-                  <p>{user?.email}</p>
-                  <button onClick={() => router.push("/profile")}>Profile</button>
-                  <button onClick={() => router.push("/login")}>Logout</button>
-                </div>
-              )}
-            </li>
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">Setting</a></li>
-          </div>
-        </div>
-      </header>
-      <div className="header-underline"></div>
+      <Navigation showProfile={true} showHamburger={true} />
 
       <div className="main-content">
-        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
-          <div className="Selection">
-            <a href="/home" onClick={(e) => handleNavigation(e, "/home")}>Home</a>
-            <div className="kai"></div>
-            <a href="/analysis" onClick={(e) => handleNavigation(e, "/analysis")}>Analysis</a>
-            <div className="kai"></div>
-            <a href="/profile" onClick={(e) => handleNavigation(e, "/profile")}>Profile</a>
-            <div className="kai"></div>
-            <a href="#" onClick={(e) => e.preventDefault()}>Settings</a>
-            <div className="kai"></div>
-            <a href="#" onClick={(e) => e.preventDefault()}>Rapsodo</a>
-            <div className="kai"></div>
-            <a href="/home" onClick={(e) => handleNavigation(e, "/home")}>Home</a>
-          </div>
-        </div>
-
         <div className="RightContent">
           <div className="profile-page">
             <h1 className="profile-title">Profile Page</h1>

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import "./create_player.css";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { db, storage } from "@/lib/firebase"; // Import Firebase storage and Firestore
+import Navigation from "@/components/Navigation";
+import { db, storage } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase storage functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
 
 export default function Homepage() {
@@ -85,37 +85,9 @@ export default function Homepage() {
 
   return (
     <>
-      <header>
-        <ul className="header-container">
-          <li className="logo">SportsPBL</li>
-          <li className="hamburger" onClick={toggleMenu}>
-            &#9776;
-          </li>
-          <div className="header-right">
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">設定</a></li>
-          </div>
-        </ul>
-      </header>
-      <div className="header-underline"></div>
+      <Navigation showProfile={true} showHamburger={true} />
 
       <div className="main-content">
-        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
-          <div className="Selection">
-            <Link href="/home">Home</Link>
-            <div className="kai"></div>
-            <Link href="">Analysis<br/></Link>
-            <div className="kai"></div>
-            <Link href="/profile">Profile<br/></Link>
-            <div className="kai"></div>
-            <Link href="">Setting<br/></Link>
-            <div className="kai"></div>
-            <Link href="">Rapsodo<br/></Link>
-          </div>
-        </div>
-
-        {/* Add Player Form */}
         <div className="add-player-form">
           <h2>Add New Player</h2>
 
