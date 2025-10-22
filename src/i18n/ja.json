@@ -118,6 +118,7 @@
   "analysis.maxSpeedByPlayer": "選手別最高球速",
   "analysis.averageSpinByPlayer": "選手別平均回転数",
   "analysis.performanceRadar": "パフォーマンスレーダー",
+  "analysis.tabs.whole":"全体",
 
   "forgotPassword.title": "パスワードをお忘れの方",
   "forgotPassword.email": "メールアドレス",

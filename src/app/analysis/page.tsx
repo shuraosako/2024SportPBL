@@ -24,7 +24,7 @@ export default function AnalysisPage() {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [allPlayerData, setAllPlayerData] = useState<PlayerData[]>([]);
   const [filteredPlayerData, setFilteredPlayerData] = useState<PlayerData[]>([]);
-  const [currentTab, setCurrentTab] = useState<"individual" | "comparison">("individual");
+  const [currentTab, setCurrentTab] = useState<"individual" | "comparison" | "whole">("whole");
 
   // Fetch players
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function AnalysisPage() {
     setSelectedPlayer(null);
   };
 
-  const handleTabChange = (tab: "individual" | "comparison") => {
+  const handleTabChange = (tab: "individual" | "comparison" | "whole") => {
     setCurrentTab(tab);
     if (tab === "individual") {
       setSelectedPlayers([]);
@@ -111,68 +111,81 @@ export default function AnalysisPage() {
     }
   };
 
-  return (
-    <>
-      <Navigation showProfile={true} showHamburger={true} />
+ return (
+  <>
+    <Navigation showProfile={true} showHamburger={true} />
 
-      <div className="main-content">
-        <div className="RightContent">
-          <div className="analysis-container">
-            {/* Tab Navigation */}
-            <div className="tab-section">
-              <div className="tab-buttons">
-                <button
-                  className={`tab-button ${currentTab === "individual" ? "active" : ""}`}
-                  onClick={() => handleTabChange("individual")}
-                >
-                  {t("analysis.tabs.individual")}
-                </button>
-                <button
-                  className={`tab-button ${currentTab === "comparison" ? "active" : ""}`}
-                  onClick={() => handleTabChange("comparison")}
-                >
-                  {t("analysis.tabs.comparison")}
-                </button>
+    <div className="main-content">
+      <div className="RightContent">
+        <div className="analysis-container">
+          {/* Tab Navigation */}
+          <div className="tab-section">
+            <div className="tab-buttons">
+              <button
+                className={`tab-button ${currentTab === "whole" ? "active" : ""}`}
+                onClick={() => handleTabChange("whole")}
+              >
+                {t("analysis.tabs.whole")}
+              </button>
+              <button
+                className={`tab-button ${currentTab === "individual" ? "active" : ""}`}
+                onClick={() => handleTabChange("individual")}
+              >
+                {t("analysis.tabs.individual")}
+              </button>
+              <button
+                className={`tab-button ${currentTab === "comparison" ? "active" : ""}`}
+                onClick={() => handleTabChange("comparison")}
+              >
+                {t("analysis.tabs.comparison")}
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Section */}
+          <FilterSection
+            startDate={startDate}
+            endDate={endDate}
+            showAllPeriod={showAllPeriod}
+            players={players}
+            selectedPlayer={selectedPlayer}
+            selectedPlayers={selectedPlayers}
+            currentTab={currentTab}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onShowAllPeriodChange={setShowAllPeriod}
+            onPlayerSelect={handlePlayerSelect}
+            onPlayersSelect={handlePlayersSelect}
+          />
+
+          {/* Graph Display */}
+          <div className="graphs-container">
+            {currentTab === "whole" && (
+              <div>
+                {/* ここに全体グラフのコンポーネントを追加 */}
+                <p>全体グラフ</p>
               </div>
-            </div>
+            )}
 
-            {/* Filter Section */}
-            <FilterSection
-              startDate={startDate}
-              endDate={endDate}
-              showAllPeriod={showAllPeriod}
-              players={players}
-              selectedPlayer={selectedPlayer}
-              selectedPlayers={selectedPlayers}
-              currentTab={currentTab}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
-              onShowAllPeriodChange={setShowAllPeriod}
-              onPlayerSelect={handlePlayerSelect}
-              onPlayersSelect={handlePlayersSelect}
-            />
+            {currentTab === "individual" && (
+              <IndividualAnalysis
+                selectedPlayer={selectedPlayer}
+                players={players}
+                playerData={filteredPlayerData}
+              />
+            )}
 
-            {/* Graph Display */}
-            <div className="graphs-container">
-              {currentTab === "individual" && (
-                <IndividualAnalysis
-                  selectedPlayer={selectedPlayer}
-                  players={players}
-                  playerData={filteredPlayerData}
-                />
-              )}
-
-              {currentTab === "comparison" && (
-                <ComparisonGraph
-                  players={players}
-                  playerData={filteredPlayerData}
-                  selectedPlayers={selectedPlayers}
-                />
-              )}
-            </div>
+            {currentTab === "comparison" && (
+              <ComparisonGraph
+                players={players}
+                playerData={filteredPlayerData}
+                selectedPlayers={selectedPlayers}
+              />
+            )}
           </div>
         </div>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }
