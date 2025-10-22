@@ -1,14 +1,9 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlayerData, Player } from "../types";
-
-const COLORS = {
-  primary: "#2563eb",
-  secondary: "#10b981",
-  tertiary: "#f59e0b",
-};
+import './IndividualAnalysis.css';
 
 interface IndividualAnalysisProps {
   selectedPlayer: string | null;
@@ -25,7 +20,7 @@ export default function IndividualAnalysis({
 
   if (!selectedPlayer) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div className="noDataContainer">
         <p>{t("analysis.noPlayerSelected")}</p>
       </div>
     );
@@ -38,7 +33,7 @@ export default function IndividualAnalysis({
 
   if (filteredData.length === 0) {
     return (
-      <div style={{ padding: '20px' }}>
+      <div className="noDataWithTitle">
         <h3>{player?.name || t("analysis.selectPlayer")}</h3>
         <p>{t("analysis.noData")}</p>
       </div>
@@ -78,40 +73,15 @@ export default function IndividualAnalysis({
   const maxSpin = Math.max(...spins);
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #a7a8b4ff 0%)',
-      padding: '20px'
-    }}>
+    <div className="container">
       {/* グリッドレイアウト */}
-     <div style={{
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: '15px',
-  maxWidth: '100%',
-  margin: '0 auto'
-}}>
+      <div className="gridLayout">
         {/* 左上: 球速統計 */}
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '30px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            marginBottom: '20px',
-            color: '#333',
-            fontWeight: 'bold'
-          }}>
+        <div className="card">
+          <h3 className="cardTitle">
             {t("analysis.averageSpeed")}
           </h3>
-          <div style={{
-            fontSize: '48px',
-            fontWeight: 'bold',
-            color: '#667eea',
-            marginBottom: '30px'
-          }}>
+          <div className="speedValue">
             {avgSpeed.toFixed(0)}{t("common.kph")}
           </div>
           
@@ -127,26 +97,11 @@ export default function IndividualAnalysis({
         </div>
 
         {/* 右上: 回転数統計 */}
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '30px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            marginBottom: '20px',
-            color: '#333',
-            fontWeight: 'bold'
-          }}>
+        <div className="card">
+          <h3 className="cardTitle">
             {t("analysis.averageSpin")}
           </h3>
-          <div style={{
-            fontSize: '48px',
-            fontWeight: 'bold',
-            color: '#e74c3c',
-            marginBottom: '30px'
-          }}>
+          <div className="spinValue">
             {Math.round(avgSpin)}
           </div>
           
@@ -162,28 +117,14 @@ export default function IndividualAnalysis({
         </div>
 
         {/* 左下: ストライク率 */}
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '30px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            marginBottom: '30px',
-            color: '#333',
-            fontWeight: 'bold'
-          }}>
+        <div className="strikeCard">
+          <h3 className="strikeTitle">
             {t("analysis.strikeRate")}
           </h3>
           
           {/* 円グラフ風の表示 */}
-          <div style={{ position: 'relative', width: '200px', height: '200px' }}>
-            <svg width="200" height="200" style={{ transform: 'rotate(-90deg)' }}>
+          <div className="circleContainer">
+            <svg width="200" height="200" className="circleSvg">
               {/* 背景の円 */}
               <circle
                 cx="100"
@@ -205,53 +146,25 @@ export default function IndividualAnalysis({
                 strokeLinecap="round"
               />
             </svg>
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '48px',
-              fontWeight: 'bold',
-              color: '#f1c40f'
-            }}>
+            <div className="strikeRateValue">
               {strikeRate.toFixed(0)}%
             </div>
           </div>
         </div>
 
         {/* 右下: 速度と回転数の関係 */}
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '30px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
-            <h3 style={{ 
-              fontSize: '18px',
-              color: '#333',
-              fontWeight: 'bold'
-            }}>
+        <div className="card">
+          <div className="scatterHeader">
+            <h3 className="scatterTitle">
               {t("analysis.speed")}
             </h3>
-            <h3 style={{ 
-              fontSize: '18px',
-              color: '#333',
-              fontWeight: 'bold'
-            }}>
+            <h3 className="scatterTitle">
               {t("analysis.spin")}
             </h3>
           </div>
           
           {/* 散布図風の表示 */}
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '280px',
-            border: '2px solid #f0f0f0',
-            borderRadius: '8px',
-            background: '#fafafa'
-          }}>
+          <div className="scatterPlot">
             {scatterData.map((point, index) => {
               // 座標を正規化
               const speedRange = maxSpeed - minSpeed || 1;
@@ -262,15 +175,10 @@ export default function IndividualAnalysis({
               return (
                 <div
                   key={index}
+                  className="scatterDot"
                   style={{
-                    position: 'absolute',
                     left: `${x}%`,
-                    top: `${y}%`,
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: '#22e44cff',
-                    transform: 'translate(-50%, -50%)'
+                    top: `${y}%`
                   }}
                 />
               );

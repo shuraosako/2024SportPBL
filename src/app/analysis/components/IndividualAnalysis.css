@@ -1,0 +1,118 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a7a8b4ff 0%);
+  padding: 20px;
+}
+
+.gridLayout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+}
+
+.speedValue {
+  font-size: 48px;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 30px;
+}
+
+.spinValue {
+  font-size: 48px;
+  font-weight: bold;
+  color: #e74c3c;
+  margin-bottom: 30px;
+}
+
+.strikeCard {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.strikeTitle {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: #333;
+  font-weight: bold;
+}
+
+.circleContainer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.circleSvg {
+  transform: rotate(-90deg);
+}
+
+.strikeRateValue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  font-weight: bold;
+  color: #f1c40f;
+}
+
+.scatterHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.scatterTitle {
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}
+
+.scatterPlot {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  border: 2px solid #f0f0f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.scatterDot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22e44cff;
+  transform: translate(-50%, -50%);
+}
+
+.noDataContainer {
+  padding: 20px;
+  text-align: center;
+}
+
+.noDataWithTitle {
+  padding: 20px;
+}
