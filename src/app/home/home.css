@@ -55,10 +55,51 @@
   text-align: center;
   background-color: #fff;
 }
+.card-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
 
+
+
+.player-info {
+  flex: 1;
+  text-align: center; /* leftからcenterに変更 */
+}
+.player-grade {
+  font-size: 20px; /* 学年の文字サイズ */
+  font-weight: bold; /* 太字 */
+  color: white; /* 白文字 */
+  background-color: #4A90E2; /* 青背景 */
+  padding: 8px 16px; /* 内側の余白 */
+  border-radius: 4px; /* 角を少し丸く(オプション) */
+  display: inline-block; /* 文字幅に合わせた四角 */
+  margin: 8px 0; /* 上下の余白 */
+}
+.player-name {
+  font-size: 18px; /* 名前の文字サイズ */
+  font-weight: bold; /* 太字 */
+  padding: 8px 16px; /* 内側の余白 */
+  margin: 8px 0; /* 上下の余白 */
+}
+.player-stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* 身長と体重の間隔 */
+  margin: 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #333; /* アンダーバー */
+}
+
+.stat-item {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
 .player-photo {
-  width: 80px;
-  height: 80px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 10px;

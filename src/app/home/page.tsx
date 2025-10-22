@@ -267,22 +267,28 @@ export default function Home() {
             </div>
           </div>
  
-          {/* Player Cards */}
+{/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
                 <Link key={player.id} href={`/player/${player.id}`} className="player-card">
-                  {player.imageURL && (
-                    <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
-                  )}
-                  <h3>{player.name}</h3>
-                  <p>学年: {player.grade}</p>
-                  <p>身長: {player.height} cm</p>
-                  <p>体重: {player.weight} kg</p>
-                  <p>最終更新日: {formatCreationDate(player.creationDate)}</p>
-                  <p>最高球速/直近の球速:</p>
-                  <p>得意球種:</p>
-
+                  <div className="card-content">
+                    {player.imageURL && (
+                      <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
+                    )}
+                    <div className="player-info">
+                      <p className="player-grade">{player.grade}年</p>
+                      <h3 className="player-name">{player.name}</h3>
+                      <div className="player-stats">
+                        <span className="stat-item">身長: {player.height} cm</span>
+                        <span className="stat-item">体重: {player.weight} kg</span>
+                      </div>
+                      <p></p>
+                      <p>最終更新日: {formatCreationDate(player.creationDate)}</p>
+                      <p>最高球速/直近の球速:</p>
+                      <p>得意球種:</p>
+                    </div>
+                  </div>
                 </Link>
               ))
             ) : (
@@ -292,5 +298,4 @@ export default function Home() {
         </div>
       </div>
     </>
-  );
-}
+  );}
