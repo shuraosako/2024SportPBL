@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlayerData, Player } from "../types";
 
@@ -25,8 +25,8 @@ export default function IndividualAnalysis({
 
   if (!selectedPlayer) {
     return (
-      <div className="graph-section">
-        <p className="no-data-message">{t("analysis.noPlayerSelected")}</p>
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p>{t("analysis.noPlayerSelected")}</p>
       </div>
     );
   }
@@ -38,11 +38,9 @@ export default function IndividualAnalysis({
 
   if (filteredData.length === 0) {
     return (
-      <div className="graph-section">
-        <h3 className="graph-title">
-          {player?.name || t("analysis.selectPlayer")}
-        </h3>
-        <p className="no-data-message">{t("analysis.noData")}</p>
+      <div style={{ padding: '20px' }}>
+        <h3>{player?.name || t("analysis.selectPlayer")}</h3>
+        <p>{t("analysis.noData")}</p>
       </div>
     );
   }
@@ -50,143 +48,235 @@ export default function IndividualAnalysis({
   // Calculate statistics
   const speeds = filteredData.map(d => d.speed);
   const spins = filteredData.map(d => d.spin);
-  const trueSpins = filteredData.map(d => d.trueSpin);
-  const spinEffs = filteredData.map(d => d.spinEff);
   const strikes = filteredData.filter(d => d.strike === 1).length;
-
+  
   const avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-  const maxSpeed = Math.max(...speeds);
-  const minSpeed = Math.min(...speeds);
   const avgSpin = spins.reduce((a, b) => a + b, 0) / spins.length;
-  const maxSpin = Math.max(...spins);
-  const avgTrueSpin = trueSpins.reduce((a, b) => a + b, 0) / trueSpins.length;
-  const avgSpinEff = spinEffs.reduce((a, b) => a + b, 0) / spinEffs.length;
   const strikeRate = (strikes / filteredData.length) * 100;
 
-  // Prepare chart data
-  const chartData = filteredData.map(data => ({
-    date: new Date(data.date).toLocaleDateString(),
-    speed: data.speed,
-    spin: data.spin,
-    strikeRate: data.strike * 100,
+  // グラフ用データ
+  const speedChartData = filteredData.map((data, index) => ({
+    name: `${index + 1}`,
+    value: data.speed
   }));
 
+  const spinChartData = filteredData.map((data, index) => ({
+    name: `${index + 1}`,
+    value: data.spin
+  }));
+
+  // 散布図用データ
+  const scatterData = filteredData.map(data => ({
+    speed: data.speed,
+    spin: data.spin
+  }));
+
+  // 散布図の範囲を自動計算
+  const minSpeed = Math.min(...speeds);
+  const maxSpeed = Math.max(...speeds);
+  const minSpin = Math.min(...spins);
+  const maxSpin = Math.max(...spins);
+
   return (
-    <div className="graph-section">
-      <h3 className="graph-title">
-        {player?.name || t("analysis.selectPlayer")} - {t("analysis.tabs.individual")}
-      </h3>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #a7a8b4ff 0%)',
+      padding: '20px'
+    }}>
+      {/* グリッドレイアウト */}
+     <div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: '15px',
+  maxWidth: '100%',
+  margin: '0 auto'
+}}>
+        {/* 左上: 球速統計 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '30px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ 
+            fontSize: '18px', 
+            marginBottom: '20px',
+            color: '#333',
+            fontWeight: 'bold'
+          }}>
+            {t("analysis.averageSpeed")}
+          </h3>
+          <div style={{
+            fontSize: '48px',
+            fontWeight: 'bold',
+            color: '#667eea',
+            marginBottom: '30px'
+          }}>
+            {avgSpeed.toFixed(0)}{t("common.kph")}
+          </div>
+          
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={speedChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#667eea" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-      {/* Statistics Cards */}
-      <div className="statistics-grid">
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.averageSpeed")}</div>
-          <div className="stat-value">{avgSpeed.toFixed(1)} {t("common.kph")}</div>
+        {/* 右上: 回転数統計 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '30px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ 
+            fontSize: '18px', 
+            marginBottom: '20px',
+            color: '#333',
+            fontWeight: 'bold'
+          }}>
+            {t("analysis.averageSpin")}
+          </h3>
+          <div style={{
+            fontSize: '48px',
+            fontWeight: 'bold',
+            color: '#e74c3c',
+            marginBottom: '30px'
+          }}>
+            {Math.round(avgSpin)}
+          </div>
+          
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={spinChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#e74c3c" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.maxSpeed")}</div>
-          <div className="stat-value">{maxSpeed.toFixed(1)} {t("common.kph")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.minSpeed")}</div>
-          <div className="stat-value">{minSpeed.toFixed(1)} {t("common.kph")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.averageSpin")}</div>
-          <div className="stat-value">{Math.round(avgSpin)} {t("common.rpm")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.maxSpin")}</div>
-          <div className="stat-value">{Math.round(maxSpin)} {t("common.rpm")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.averageTrueSpin")}</div>
-          <div className="stat-value">{Math.round(avgTrueSpin)} {t("common.rpm")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.averageSpinEff")}</div>
-          <div className="stat-value">{avgSpinEff.toFixed(1)}{t("common.percent")}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">{t("analysis.strikeRate")}</div>
-          <div className="stat-value">{strikeRate.toFixed(1)}{t("common.percent")}</div>
-        </div>
-      </div>
 
-      {/* Speed Chart */}
-      <div className="graph-item">
-        <h4 className="chart-subtitle">{t("analysis.speedChart")}</h4>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" stroke="#666" />
-            <YAxis
-              stroke={COLORS.primary}
-              label={{ value: t("common.kph"), angle: -90, position: 'insideLeft' }}
-            />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="speed"
-              stroke={COLORS.primary}
-              name={t("analysis.speed")}
-              dot={true}
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+        {/* 左下: ストライク率 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '30px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: '18px', 
+            marginBottom: '30px',
+            color: '#333',
+            fontWeight: 'bold'
+          }}>
+            {t("analysis.strikeRate")}
+          </h3>
+          
+          {/* 円グラフ風の表示 */}
+          <div style={{ position: 'relative', width: '200px', height: '200px' }}>
+            <svg width="200" height="200" style={{ transform: 'rotate(-90deg)' }}>
+              {/* 背景の円 */}
+              <circle
+                cx="100"
+                cy="100"
+                r="80"
+                fill="none"
+                stroke="#f0f0f0"
+                strokeWidth="20"
+              />
+              {/* ストライク率の円 */}
+              <circle
+                cx="100"
+                cy="100"
+                r="80"
+                fill="none"
+                stroke="#f1c40f"
+                strokeWidth="20"
+                strokeDasharray={`${2 * Math.PI * 80 * (strikeRate / 100)} ${2 * Math.PI * 80}`}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '48px',
+              fontWeight: 'bold',
+              color: '#f1c40f'
+            }}>
+              {strikeRate.toFixed(0)}%
+            </div>
+          </div>
+        </div>
 
-      {/* Spin Chart */}
-      <div className="graph-item">
-        <h4 className="chart-subtitle">{t("analysis.spinChart")}</h4>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" stroke="#666" />
-            <YAxis
-              stroke={COLORS.secondary}
-              label={{ value: t("common.rpm"), angle: -90, position: 'insideLeft' }}
-            />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="spin"
-              stroke={COLORS.secondary}
-              name={t("analysis.spin")}
-              dot={true}
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Strike Rate Chart */}
-      <div className="graph-item">
-        <h4 className="chart-subtitle">{t("analysis.strikeRateChart")}</h4>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" stroke="#666" />
-            <YAxis
-              stroke={COLORS.tertiary}
-              label={{ value: t("common.percent"), angle: -90, position: 'insideLeft' }}
-              domain={[0, 100]}
-            />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="strikeRate"
-              stroke={COLORS.tertiary}
-              name={t("analysis.strikeRate")}
-              dot={true}
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        {/* 右下: 速度と回転数の関係 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '30px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+            <h3 style={{ 
+              fontSize: '18px',
+              color: '#333',
+              fontWeight: 'bold'
+            }}>
+              {t("analysis.speed")}
+            </h3>
+            <h3 style={{ 
+              fontSize: '18px',
+              color: '#333',
+              fontWeight: 'bold'
+            }}>
+              {t("analysis.spin")}
+            </h3>
+          </div>
+          
+          {/* 散布図風の表示 */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '280px',
+            border: '2px solid #f0f0f0',
+            borderRadius: '8px',
+            background: '#fafafa'
+          }}>
+            {scatterData.map((point, index) => {
+              // 座標を正規化
+              const speedRange = maxSpeed - minSpeed || 1;
+              const spinRange = maxSpin - minSpin || 1;
+              const x = ((point.speed - minSpeed) / speedRange) * 90 + 5;
+              const y = 100 - ((point.spin - minSpin) / spinRange) * 90;
+              
+              return (
+                <div
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    left: `${x}%`,
+                    top: `${y}%`,
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    background: '#22e44cff',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
