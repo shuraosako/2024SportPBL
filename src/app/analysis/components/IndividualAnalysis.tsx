@@ -16,7 +16,7 @@ export default function IndividualAnalysis({
   players,
   playerData,
 }: IndividualAnalysisProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   if (!selectedPlayer) {
     return (
@@ -52,7 +52,11 @@ export default function IndividualAnalysis({
   // 最新のデータの日付を取得
   const latestDate = filteredData[filteredData.length - 1].date;
   const dateObj = new Date(latestDate);
-  const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
+  
+  // 日付のフォーマット（言語によって変更）
+  const formattedDate = language === 'ja' 
+    ? `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`
+    : dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   // グラフ用データ
   const speedChartData = filteredData.map((data, index) => ({
@@ -89,7 +93,7 @@ export default function IndividualAnalysis({
           {/* 球速グラフ */}
           <div className="chartCard">
             <h3 className="chartTitle">
-              速度<br />(km/h)
+              {t("analysis.speed")}<br />({t("common.kph")})
             </h3>
             
             <ResponsiveContainer width="100%" height={200}>
@@ -98,7 +102,7 @@ export default function IndividualAnalysis({
                 <XAxis 
                   dataKey="name" 
                   tick={{ fontSize: 12 }}
-                  label={{ value: '日付or回目', position: 'insideBottomRight', offset: -5, fontSize: 12 }}
+                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -110,7 +114,7 @@ export default function IndividualAnalysis({
           {/* 回転数グラフ */}
           <div className="chartCard">
             <h3 className="chartTitle">
-              回転数
+              {t("analysis.spin")}
             </h3>
             
             <ResponsiveContainer width="100%" height={200}>
@@ -119,7 +123,7 @@ export default function IndividualAnalysis({
                 <XAxis 
                   dataKey="name" 
                   tick={{ fontSize: 12 }}
-                  label={{ value: '日付or回目', position: 'insideBottomRight', offset: -5, fontSize: 12 }}
+                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -133,16 +137,16 @@ export default function IndividualAnalysis({
         <div className="cardsRow">
           {/* 球速(平均) */}
           <div className="valueCard">
-            <h3 className="valueTitle">球速(平均)</h3>
+            <h3 className="valueTitle">{t("analysis.speedAverage")}</h3>
             <p className="dateText">{formattedDate}</p>
             <div className="speedValue">
-              {avgSpeed.toFixed(0)}km/h
+              {avgSpeed.toFixed(0)}{t("common.kph")}
             </div>
           </div>
 
           {/* 回転数(平均) */}
           <div className="valueCard">
-            <h3 className="valueTitle">回転数(平均)</h3>
+            <h3 className="valueTitle">{t("analysis.spinAverage")}</h3>
             <div className="spinValue">
               {Math.round(avgSpin)}
             </div>
@@ -151,7 +155,7 @@ export default function IndividualAnalysis({
           {/* ストライク率 */}
           <div className="strikeCard">
             <h3 className="strikeTitle">
-              ストライク率
+              {t("analysis.strikeRate")}
             </h3>
             
             <div className="circleContainer">
@@ -187,8 +191,8 @@ export default function IndividualAnalysis({
           {/* 散布図 */}
           <div className="scatterCard">
             <div className="scatterPlot">
-              <span className="scatterAxisLabel scatterAxisLabelLeft">速度</span>
-              <span className="scatterAxisLabel scatterAxisLabelBottom">回転数</span>
+              <span className="scatterAxisLabel scatterAxisLabelLeft">{t("analysis.scatterAxisSpeed")}</span>
+              <span className="scatterAxisLabel scatterAxisLabelBottom">{t("analysis.scatterAxisSpin")}</span>
               
               {scatterData.map((point, index) => {
                 const speedRange = maxSpeed - minSpeed || 1;
