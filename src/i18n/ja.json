@@ -119,7 +119,13 @@
   "analysis.averageSpinByPlayer": "選手別平均回転数",
   "analysis.performanceRadar": "パフォーマンスレーダー",
   "analysis.tabs.whole":"全体",
-
+  "analysis.speedUnit": "球速",
+  "analysis.dateOrTurn": "日付or回目",
+  "analysis.speedAverage": "球速(平均)",
+  "analysis.spinAverage": "回転数(平均)",
+  "analysis.scatterAxisSpeed": "速度",
+  "analysis.scatterAxisSpin": "回転数",
+  
   "forgotPassword.title": "パスワードをお忘れの方",
   "forgotPassword.email": "メールアドレス",
   "forgotPassword.submit": "リセットリンクを送信",
@@ -149,4 +155,5 @@
   "top.clubIntroPara4": "FITの大学生らしい溌剌とした、グラウンドを全力疾走で駆け回る姿・球場全体を轟かせる最大発声で、観客の皆様に感動を与えられるよう精進致します。",
   "top.rapsodoTitle": "Rapsodoとは",
   "top.rapsodoDescription": "ラプソードは、野球・ソフトボール・ゴルフの投球・打球をカメラとレーダーで計測・分析するデータトラッキング機器です。計測されるデータには、キャリー、飛距離、クラブスピード、ボールスピード、打出角度、打出方向、ミート率などが含まれています"
+
 }
