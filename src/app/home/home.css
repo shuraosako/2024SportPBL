@@ -47,23 +47,6 @@
   margin-top: 20px;
 }
 
-.player-card {
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  background-color: #fff;
-}
-
-.player-photo {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
 /* Profile Popup */
 .profile-section {
   display: flex;
@@ -210,9 +193,207 @@
     max-width: 100px;
   }
 
-  .player-cards-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* Player Cards Section */
+.player-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* Player Card Styles */
+.player-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+}
+
+.player-card:hover {
+  transform: translateY(-5px);
+}
+
+.player-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.player-photo-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #e0e0e0;
+}
+
+.player-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-grade-badge {
+  background: linear-gradient(135deg, #6DD5FA, #2980B9);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.player-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.player-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+.fatigue-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.fatigue-bar {
+  flex: 1;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fatigue-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.3s;
+}
+
+.fatigue-text {
+  font-weight: bold;
+  min-width: 60px;
+}
+
+.fatigue-label {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.max-speed-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin: 10px 0;
+}
+
+.speed-label {
+  font-size: 14px;
+}
+
+.speed-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.condition-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.condition-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.condition-icon {
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.condition-text {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.player-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+
+.tag {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.tag-position {
+  background: #2196F3;
+  color: white;
+}
+
+.tag-batting {
+  background: #2196F3;
+  color: white;
+}
+
+.tag-health {
+  background: #4CAF50;
+  color: white;
+}
+
+.tag-add-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.last-update {
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  margin-top: 10px;
+}
+
+/* Profile Popup */
+.profile-section {
+  display: flex;
+  align-items: center;
 
   .player-card {
     padding: 12px;

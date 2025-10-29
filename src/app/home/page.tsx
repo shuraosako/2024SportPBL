@@ -1,39 +1,21 @@
 "use client";
-// change
- 
+
 import { useState, useEffect } from "react";
 import "./home.css";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db,} from "@/lib/firebase";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import Image from "next/image";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
- 
-// Define the Player type with imageURL and creationDate
-type Player = {
-  id: string;
-  name: string;
-  grade: string;
-  height: number;
-  weight: number;
-  fatiguelevel: number;
-  maxspeed: number;
-  condition: number;
-  positions: string[];
-  pitchingAndBattingStyles: string[];
-  pitchTypes: string[];
-  Health: string[];
-  imageURL?: string;
-  creationDate?: { seconds: number; nanoseconds: number }; // Firestore timestamp format
-};
- 
+import Navigation from "@/components/layout/Navigation";
+import { Player } from "@/types";
+import { formatFirebaseDate } from "@/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export default function Home() {
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
@@ -42,9 +24,6 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // For profile pop-up
-  const [profileImage, setProfileImage] = useState<string | null>(null); // User's profile image
-  const [userName, setUserName] = useState<string | null>(null); // User's name or email
  
   // Fetch players from Firestore
   useEffect(() => {
@@ -71,50 +50,7 @@ export default function Home() {
  
     fetchPlayers();
   }, []);
- 
-  // Fetch the logged-in user's profile photo
-  useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("User UID: ", user.uid); // Debugging
- 
-        try {
-          const userDocRef = doc(db, "users", user.uid); // Path to Firestore document
-          const userDoc = await getDoc(userDocRef);
- 
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            console.log("User Document Data: ", data);
- 
-            // Fetch and set the username if available, fallback to email otherwise
-            const username = data?.username || user.email;
-            setUserName(username);
- 
-            // Fetch profile image
-            const profileImageUrl = data?.profileImageUrl || null;
-            setProfileImage(profileImageUrl);
-          } else {
-            console.log("User document does not exist.");
-            setUserName(user.email); // Fallback to email
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setUserName(user.email); // Fallback to email
-        }
-      } else {
-        router.push("/login"); // Redirect to login if not authenticated
-      }
-    });
-  }, [router]);
- 
- 
-  const formatCreationDate = (timestamp?: { seconds: number; nanoseconds: number }) => {
-    return timestamp
-      ? new Date(timestamp.seconds * 1000).toLocaleDateString("en-GB") // Format as DD/MM/YYYY
-      : "Unknown date";
-  };
- 
+
   const handleFilter = () => {
     let filtered = players;
  
@@ -161,67 +97,16 @@ export default function Home() {
   const handleAddNewPlayer = () => {
     router.push("/create_player");
   };
- 
-  const toggleProfilePopup = () => {
-    setIsProfileOpen(!isProfileOpen);
+
+  const handlePlayerClick = (playerId: string) => {
+    router.push(`/player/${playerId}`);
   };
- 
-  const navigateToProfile = () => {
-    router.push("/profile");
-  };
- 
+
   return (
     <>
-      <header>
-        <div className="header-container">
-          <div className="logo">SportsPBL</div>
-          <div className="header-right">
-            <li className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              &#9776;
-            </li>
-            {/* Profile Section */}
-            <li className="profile-section" onClick={toggleProfilePopup}>
-              <div className="profile-info">
-                <img
-                  src={profileImage || "/default-profile.png"} // Default profile image if not available
-                  alt="Profile"
-                  className="profile-image"
-                />
-                <span className="username">{userName || "Guest"}</span> {/* Show username */}
-              </div>
-              {isProfileOpen && (
-                <div className="profile-popup">
-                  <p>{userName}</p>
-                  <button onClick={navigateToProfile}>Profile</button>
-                  <button onClick={() => router.push("/login")}>Logout</button>
-                </div>
-              )}
-            </li>
-            <li><Link href="/login">LOGIN</Link></li>
-            <li><Link href="http://localhost:3000">TOP</Link></li>
-            <li><a href="#">Setting</a></li>
-          </div>
-        </div>
-      </header>
-      <div className="header-underline"></div>
- 
+      <Navigation showProfile={true} showHamburger={true} />
+
       <div className="main-content">
-        <div className={`LeftSelection ${isMenuOpen ? "open" : ""}`}>
-          <div className="Selection">
-            <Link href="/home">Home</Link>
-            <div className="kai"></div>
-            <Link href="/analysis">Analysis</Link>
-            <div className="kai"></div>
-            <Link href="/profile">Profile</Link>
-            <div className="kai"></div>
-            <Link href="">Settings</Link>
-            <div className="kai"></div>
-            <Link href="">Rapsodo</Link>
-            <div className="kai"></div>
-            <Link href="/home">Home</Link>
-          </div>
-        </div>
- 
         <div className="RightContenthome">
           {/* Filters */}
           <div className="dropdown-container">
@@ -229,16 +114,16 @@ export default function Home() {
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
               dateFormat="dd/MM/yyyy"
-              placeholderText="Select a date"
+              placeholderText={t("home.selectDate")}
               className="dropdown-item"
             />
- 
+
             <div className="name-autocomplete">
               <input
                 type="text"
                 value={searchName}
                 onChange={(e) => handleNameInputChange(e.target.value)}
-                placeholder="Search by name"
+                placeholder={t("home.searchByName")}
                 className="dropdown-item"
               />
               {nameSuggestions.length > 0 && (
@@ -251,26 +136,26 @@ export default function Home() {
                 </ul>
               )}
             </div>
- 
+
             <select
               value={searchGrade}
               onChange={(e) => setSearchGrade(e.target.value)}
               className="dropdown-item"
             >
-              <option value="">All Grades</option>
+              <option value="">{t("home.allGrades")}</option>
               {grades.map((grade, index) => (
                 <option key={index} value={grade}>
                   {grade}
                 </option>
               ))}
             </select>
-            
+
             <div className="filter_button">
 
-            <button onClick={handleFilter}>Filter</button>
+            <button onClick={handleFilter}>{t("home.filter")}</button>
             </div>
             <div className="new_player">
-            <button onClick={handleAddNewPlayer}>New Player</button>
+            <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
             </div>
           </div>
  
@@ -278,19 +163,96 @@ export default function Home() {
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
-                <Link key={player.id} href={`/player/${player.id}`} className="player-card">
-                  {player.imageURL && (
-                    <img src={player.imageURL} alt={`${player.name}'s profile`} className="player-photo" />
-                  )}
-                  <h3>{player.name}</h3>
-                  <p>Grade: {player.grade}</p>
-                  <p>Height: {player.height} cm</p>
-                  <p>Weight: {player.weight} kg</p>
-                  <p>Joined: {formatCreationDate(player.creationDate)}</p>
-                </Link>
+                <div
+                  key={player.id}
+                  className="player-card"
+                  onClick={() => handlePlayerClick(player.id)}
+                >
+                  {/*Photos, Grade, Name*/}
+                  <div className="player-card-header">
+                    <div className="player-photo-container">
+                      {player.imageURL && (
+                        <Image
+                          src={player.imageURL}
+                          alt={`${player.name}'s profile`}
+                          className="player-photo"
+                          width={80}
+                          height={80} 
+                        />
+                      )}
+                    </div>
+                    <div className="player-grade-badge">
+                      <p>{player.grade}</p>
+                    </div>
+                  </div>
+
+                  <h3 className="player-name">{player.name}</h3>
+
+                  {/*Height,Weight */}
+                  <div className="player-stats">
+                    <span>{t("home.height")}: {player.height} {t("common.cm")}</span>
+                    <span>{t("home.weight")}: {player.weight} {t("common.kg")}</span>
+                  </div>
+
+                  {/* Fatigue bar */}
+                  <div className="fatigue-container">
+                    <div className="fatigue-bar">
+                      <div
+                        className="fatigue-progress"
+                        style={{ width: `${player.fatigue}%` }} 
+                      />
+                    </div>
+                  <span className="fatigue-text">{player.fatigueLevel}/100</span>
+                </div>
+                <p className="fatigue-label">疲労度:{player.fatigueStatus || "軽度"}</p>
+
+                  {/*Max Speed*/}
+                  <div className="max-speed-section">
+                    <span className="speed-label">{t("home.maxSpeed")}/直近</span>
+                    <span className="speed-value">
+                      {player.maxSpeed || "130"}/{player.recentSpeed || "120"}[km/h]
+                    </span>
+                  </div>
+
+                      {/*Condition*/}
+                      <div className="condition-section">
+                        <span className="condition-label">{t("home.condition")}</span>
+                        <div className="condition-status">
+                          <span className="condition-icon">⚡</span>
+                          <span className="condition-text">{player.conditionLevel || "出場可能"}</span>
+                        </div>
+                      </div>
+                      
+                      {/*Tag*/}
+                      <div className="player-tags">
+                        {player.position &&(
+                          <span className="tag tag-position">{player.position}</span>
+                        )}
+                        {player.battingStyle &&(
+                          <span className="tag tag-batting">{player.tbattingStyle}</span>
+                        )}
+                        {player.healthStatus &&(
+                          <span className="tag tag-health">{player.healthStatus}</span>
+                        )}
+                        <button 
+                          className="tag-add-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add tag logic here
+                            console.log("Add tag clicked");
+                          }}
+                          >+
+                          </button>
+                      </div>
+
+                      {/*Last update*/}
+                      <p className="last-update">
+                        {t("home.lastUpdate")}: { formatFirebaseDate(player.creationDate)}
+                      </p>
+                    </div>  
               ))
             ) : (
-              <p>No players found. Adjust your filters or add a new player.</p>
+              <p>{t("home.noPlayers")}</p>
             )}
           </div>
         </div>
