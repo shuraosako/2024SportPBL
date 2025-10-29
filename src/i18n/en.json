@@ -126,6 +126,12 @@
   "analysis.speed": "Speed",
   "analysis.spin": "Spin",
   "common.kph": "km/h",
+  "analysis.speedUnit": "Speed",
+  "analysis.dateOrTurn": "Date/Turn",
+  "analysis.speedAverage": "Speed (Average)",
+  "analysis.spinAverage": "Spin (Average)",
+  "analysis.scatterAxisSpeed": "Speed",
+  "analysis.scatterAxisSpin": "Spin",
 
   "forgotPassword.title": "Forgot Password",
   "forgotPassword.email": "Email Address",

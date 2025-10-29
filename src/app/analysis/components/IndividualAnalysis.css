@@ -4,42 +4,81 @@
   padding: 20px;
 }
 
-.gridLayout {
+.mainLayout {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 上段: グラフエリア */
+.graphRow {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-.card {
+/* 中段: 3つのカードエリア */
+.cardsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* グラフカード */
+.chartCard {
   background: white;
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.cardTitle {
-  font-size: 18px;
+.chartTitle {
+  font-size: 16px;
   margin-bottom: 20px;
+  color: #666;
+  font-weight: normal;
+}
+
+/* 数値表示カード */
+.valueCard {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.valueTitle {
+  font-size: 20px;
+  margin-bottom: 10px;
   color: #333;
-  font-weight: bold;
+  font-weight: normal;
+}
+
+.dateText {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
 }
 
 .speedValue {
   font-size: 48px;
   font-weight: bold;
-  color: #667eea;
-  margin-bottom: 30px;
+  color: #e74c3c;
 }
 
 .spinValue {
-  font-size: 48px;
+  font-size: 72px;
   font-weight: bold;
-  color: #e74c3c;
-  margin-bottom: 30px;
+  color: #667eea;
 }
 
+/* ストライク率カード */
 .strikeCard {
   background: white;
   border-radius: 16px;
@@ -55,7 +94,10 @@
   font-size: 18px;
   margin-bottom: 30px;
   color: #333;
-  font-weight: bold;
+  font-weight: normal;
+  background: #f1c40f;
+  padding: 8px 20px;
+  border-radius: 8px;
 }
 
 .circleContainer {
@@ -75,28 +117,44 @@
   transform: translate(-50%, -50%);
   font-size: 48px;
   font-weight: bold;
-  color: #f1c40f;
-}
-
-.scatterHeader {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-
-.scatterTitle {
-  font-size: 18px;
   color: #333;
-  font-weight: bold;
+}
+
+/* 散布図カード */
+.scatterCard {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .scatterPlot {
   position: relative;
   width: 100%;
   height: 280px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid #333;
   border-radius: 8px;
-  background: #fafafa;
+  background: white;
+}
+
+.scatterAxisLabel {
+  position: absolute;
+  font-size: 14px;
+  color: #333;
+}
+
+.scatterAxisLabelBottom {
+  bottom: -25px;
+  right: 10px;
+}
+
+.scatterAxisLabelLeft {
+  top: 10px;
+  left: -50px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 .scatterDot {
@@ -104,8 +162,19 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #22e44cff;
+  background: #333;
   transform: translate(-50%, -50%);
+}
+
+.scatterSize {
+  position: absolute;
+  bottom: -45px;
+  right: 10px;
+  font-size: 14px;
+  color: white;
+  background: #00a8ff;
+  padding: 5px 15px;
+  border-radius: 4px;
 }
 
 .noDataContainer {

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Player } from "../types";
+import "./FilterSection.css";
 
 interface FilterSectionProps {
   startDate: Date | null;
@@ -11,7 +13,7 @@ interface FilterSectionProps {
   players: Player[];
   selectedPlayer: string | null;
   selectedPlayers: string[];
-  currentTab: "individual" | "comparison";
+  currentTab: "individual" | "comparison" | "whole";
   onStartDateChange: (date: Date | null) => void;
   onEndDateChange: (date: Date | null) => void;
   onShowAllPeriodChange: (show: boolean) => void;
@@ -34,6 +36,19 @@ export default function FilterSection({
   onPlayersSelect,
 }: FilterSectionProps) {
   const { t } = useLanguage();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handlePlayerCheckboxChange = (playerId: string) => {
     if (selectedPlayers.includes(playerId)) {
@@ -43,6 +58,16 @@ export default function FilterSection({
         onPlayersSelect([...selectedPlayers, playerId]);
       }
     }
+  };
+
+  const getSelectedPlayerNames = () => {
+    if (selectedPlayers.length === 0) {
+      return t("analysis.selectPlayers");
+    }
+    const names = selectedPlayers
+      .map((id) => players.find((p) => p.id === id)?.name)
+      .filter(Boolean);
+    return names.join(", ");
   };
 
   return (
@@ -100,23 +125,64 @@ export default function FilterSection({
           </select>
         </div>
       ) : (
-        <div className="player-selection">
+        <div className="player-selection" ref={dropdownRef}>
           <label>{t("analysis.selectPlayers")}:</label>
-          <div className="player-checkboxes">
-            {players.map((player) => (
-              <label key={player.id} className="player-checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedPlayers.includes(player.id)}
-                  onChange={() => handlePlayerCheckboxChange(player.id)}
-                  disabled={!selectedPlayers.includes(player.id) && selectedPlayers.length >= 5}
-                />
-                <span>{player.name}</span>
-              </label>
-            ))}
+          <div className="multi-select-dropdown">
+            <button
+              type="button"
+              className="multi-select-button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <span className="selected-text">{getSelectedPlayerNames()}</span>
+              <span className="selected-count">
+                {selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
+              </span>
+              <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="dropdown-menu">
+                <div className="dropdown-header">
+                  <span>{t("analysis.selectPlayers")} (最大5人)</span>
+                  {selectedPlayers.length > 0 && (
+                    <button
+                      type="button"
+                      className="clear-button"
+                      onClick={() => onPlayersSelect([])}
+                    >
+                      クリア
+                    </button>
+                  )}
+                </div>
+                <div className="dropdown-list">
+                  {players.map((player) => (
+                    <label
+                      key={player.id}
+                      className={`dropdown-item ${
+                        selectedPlayers.includes(player.id) ? "selected" : ""
+                      } ${
+                        !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
+                          ? "disabled"
+                          : ""
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedPlayers.includes(player.id)}
+                        onChange={() => handlePlayerCheckboxChange(player.id)}
+                        disabled={
+                          !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
+                        }
+                      />
+                      <span>{player.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+        )}
     </div>
   );
 }
