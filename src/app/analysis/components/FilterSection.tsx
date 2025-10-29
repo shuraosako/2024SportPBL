@@ -13,7 +13,7 @@ interface FilterSectionProps {
   players: Player[];
   selectedPlayer: string | null;
   selectedPlayers: string[];
-  currentTab: "individual" | "comparison";
+  currentTab: "individual" | "comparison" | "whole";
   onStartDateChange: (date: Date | null) => void;
   onEndDateChange: (date: Date | null) => void;
   onShowAllPeriodChange: (show: boolean) => void;

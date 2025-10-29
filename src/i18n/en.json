@@ -118,6 +118,12 @@
   "analysis.maxSpeedByPlayer": "Max Speed by Player",
   "analysis.averageSpinByPlayer": "Average Spin by Player",
   "analysis.performanceRadar": "Performance Radar",
+  "analysis.speedUnit": "Speed",
+  "analysis.dateOrTurn": "Date/Turn",
+  "analysis.speedAverage": "Speed (Average)",
+  "analysis.spinAverage": "Spin (Average)",
+  "analysis.scatterAxisSpeed": "Speed",
+  "analysis.scatterAxisSpin": "Spin",
 
   "forgotPassword.title": "Forgot Password",
   "forgotPassword.email": "Email Address",
