@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -51,6 +52,7 @@ export default function Whole({
   playerData = [],
   onSaveData,
 }: WholeProps) {
+  const { t } = useLanguage();
   const [rows, setRows] = useState<InputRow[]>([]);
   const [searchName, setSearchName] = useState<string>("");
 
@@ -61,7 +63,7 @@ export default function Whole({
       return {
         id: `existing-data-${index}`,
         playerId: data.id,
-        playerName: player?.name || "不明",
+        playerName: player?.name || t("player.notFound"),
         date: data.date,
         speed: data.speed.toString(),
         spinRate: data.spin.toString(),
@@ -161,7 +163,7 @@ export default function Whole({
       <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="text"
-          placeholder="選手名で検索..."
+          placeholder={t("home.searchByName")}
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
           style={{
@@ -185,7 +187,7 @@ export default function Whole({
             fontWeight: '500',
           }}
         >
-          新規プレイヤー追加
+          {t("home.newPlayer")}
         </button>
 
         <select
@@ -202,7 +204,7 @@ export default function Whole({
             cursor: 'pointer',
           }}
         >
-          <option value="">既存プレイヤーを選択</option>
+          <option value="">{t("analysis.selectPlayer")}</option>
           {players.map(player => (
             <option key={player.id} value={player.id}>
               {player.name}
@@ -224,20 +226,20 @@ export default function Whole({
               marginLeft: 'auto',
             }}
           >
-            保存
+            {t("common.save")}
           </button>
         )}
 
         {searchName && (
           <span style={{ color: '#6b7280', fontSize: '14px' }}>
-            検索結果: {displayRows.length}件
+            {t("dataTable.loading")}: {displayRows.length}件
           </span>
         )}
       </div>
 
       {displayRows.length === 0 ? (
         <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-          {searchName ? '該当する選手が見つかりませんでした' : 'プレイヤーを追加してデータを入力してください'}
+          {searchName ? t("home.noPlayers") : t("dataTable.noData")}
         </p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
@@ -249,17 +251,17 @@ export default function Whole({
           }}>
             <thead>
               <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #d1d5db' }}>
-                <th style={headerStyle}>選手名</th>
-                <th style={headerStyle}>記録日</th>
-                <th style={headerStyle}>球速</th>
-                <th style={headerStyle}>回転数</th>
-                <th style={headerStyle}>TRUE SPIN</th>
-                <th style={headerStyle}>SPIN EFF.</th>
+                <th style={headerStyle}>{t("analysis.playerName")}</th>
+                <th style={headerStyle}>{t("analysis.date")}</th>
+                <th style={headerStyle}>{t("analysis.speed")}</th>
+                <th style={headerStyle}>{t("analysis.spin")}</th>
+                <th style={headerStyle}>{t("analysis.trueSpin")}</th>
+                <th style={headerStyle}>{t("analysis.spinEff")}</th>
                 <th style={headerStyle}>SPIN DIRECT</th>
-                <th style={headerStyle}>縦の変化量</th>
-                <th style={headerStyle}>横の変化量</th>
-                <th style={headerStyle}>評価</th>
-                <th style={headerStyle}>操作</th>
+                <th style={headerStyle}>{t("analysis.verticalMovement")}</th>
+                <th style={headerStyle}>{t("analysis.horizontalMovement")}</th>
+                <th style={headerStyle}>{t("analysis.evaluation")}</th>
+                <th style={headerStyle}>{t("common.delete")}</th>
               </tr>
             </thead>
             <tbody>
@@ -277,7 +279,7 @@ export default function Whole({
                         type="text"
                         value={row.playerName}
                         onChange={(e) => updateRow(row.id, 'playerName', e.target.value)}
-                        placeholder="名前を入力"
+                        placeholder={t("createPlayer.name")}
                         style={inputStyle}
                       />
                     ) : (
@@ -380,7 +382,7 @@ export default function Whole({
                         fontSize: '12px',
                       }}
                     >
-                      削除
+                      {t("common.delete")}
                     </button>
                   </td>
                 </tr>
