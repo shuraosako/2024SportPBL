@@ -1,21 +1,39 @@
+// 現在のコード全体
 "use client";
 
-import { useLanguage } from "@/contexts/LanguageContext";
-import { PlayerData, Player } from "../types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+
+interface Player {
+  id: string;
+  name: string;
+}
+
+interface PlayerData {
+  id: string;
+  date: string;
+  speed: number;
+  spin: number;
+  trueSpin?: number;
+  spinEff?: number;
+  spinDirect?: number;
+  verticalBreak?: number;
+  horizontalBreak?: number;
+  rating?: string;
+}
 
 interface WholeProps {
   players: Player[];
   playerData: PlayerData[];
-  onSaveData?: (data: any[]) => void; // 保存用コールバック
+  onSaveData?: (data: any[]) => void;
 }
 
 interface InputRow {
   id: string;
   playerId: string;
   playerName: string;
+  date: string;
   speed: string;
   spinRate: string;
   trueSpin: string;
@@ -25,23 +43,52 @@ interface InputRow {
   horizontalBreak: string;
   rating: string;
   isNew: boolean;
+  isExisting: boolean;
 }
 
 export default function Whole({
-  players,
-  playerData,
+  players = [],
+  playerData = [],
   onSaveData,
 }: WholeProps) {
-  const { t } = useLanguage();
-  
   const [rows, setRows] = useState<InputRow[]>([]);
+  const [searchName, setSearchName] = useState<string>("");
 
-  // 新規行を追加
+  // 既存データを初期表示用に変換
+  useEffect(() => {
+    const existingRows: InputRow[] = playerData.map((data, index) => {
+      const player = players.find(p => p.id === data.id);
+      return {
+        id: `existing-data-${index}`,
+        playerId: data.id,
+        playerName: player?.name || "不明",
+        date: data.date,
+        speed: data.speed.toString(),
+        spinRate: data.spin.toString(),
+        trueSpin: data.trueSpin?.toString() || "",
+        spinEff: data.spinEff?.toString() || "",
+        spinDirect: data.spinDirect?.toString() || "",
+        verticalBreak: data.verticalBreak?.toString() || "",
+        horizontalBreak: data.horizontalBreak?.toString() || "",
+        rating: data.rating || "",
+        isNew: false,
+        isExisting: true,
+      };
+    });
+    setRows(existingRows);
+  }, [playerData, players]);
+
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const addNewRow = () => {
     const newRow: InputRow = {
       id: `new-${Date.now()}`,
       playerId: "",
       playerName: "",
+      date: getTodayDate(),
       speed: "",
       spinRate: "",
       trueSpin: "",
@@ -51,11 +98,11 @@ export default function Whole({
       horizontalBreak: "",
       rating: "",
       isNew: true,
+      isExisting: false,
     };
-    setRows([...rows, newRow]);
+    setRows([newRow, ...rows]);
   };
 
-  // 既存プレイヤーの行を追加
   const addExistingPlayerRow = (playerId: string) => {
     const player = players.find(p => p.id === playerId);
     if (!player) return;
@@ -64,6 +111,7 @@ export default function Whole({
       id: `existing-${Date.now()}`,
       playerId: player.id,
       playerName: player.name,
+      date: getTodayDate(),
       speed: "",
       spinRate: "",
       trueSpin: "",
@@ -73,23 +121,21 @@ export default function Whole({
       horizontalBreak: "",
       rating: "",
       isNew: false,
+      isExisting: false,
     };
-    setRows([...rows, newRow]);
+    setRows([newRow, ...rows]);
   };
 
-  // 行を削除
   const removeRow = (id: string) => {
     setRows(rows.filter(row => row.id !== id));
   };
 
-  // 入力値を更新
   const updateRow = (id: string, field: keyof InputRow, value: string) => {
     setRows(rows.map(row => 
       row.id === id ? { ...row, [field]: value } : row
     ));
   };
 
-  // データを保存
   const handleSave = () => {
     if (onSaveData) {
       onSaveData(rows);
@@ -97,9 +143,36 @@ export default function Whole({
     console.log("保存データ:", rows);
   };
 
+  // 名前で検索してフィルタリング
+  const filteredRows = searchName.trim() === ""
+    ? rows
+    : rows.filter(row => 
+        row.playerName.toLowerCase().includes(searchName.toLowerCase())
+      );
+
+  // 検索結果を新規・既存で分けてソート
+  const displayRows = [
+    ...filteredRows.filter(r => !r.isExisting),
+    ...filteredRows.filter(r => r.isExisting)
+  ];
+
   return (
     <div className="graph-section">
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="選手名で検索..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #d1d5db',
+            borderRadius: '4px',
+            fontSize: '14px',
+            minWidth: '200px',
+          }}
+        />
+
         <button
           onClick={addNewRow}
           style={{
@@ -154,11 +227,17 @@ export default function Whole({
             保存
           </button>
         )}
+
+        {searchName && (
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>
+            検索結果: {displayRows.length}件
+          </span>
+        )}
       </div>
 
-      {rows.length === 0 ? (
+      {displayRows.length === 0 ? (
         <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-          プレイヤーを追加してデータを入力してください
+          {searchName ? '該当する選手が見つかりませんでした' : 'プレイヤーを追加してデータを入力してください'}
         </p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
@@ -171,6 +250,7 @@ export default function Whole({
             <thead>
               <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #d1d5db' }}>
                 <th style={headerStyle}>選手名</th>
+                <th style={headerStyle}>記録日</th>
                 <th style={headerStyle}>球速</th>
                 <th style={headerStyle}>回転数</th>
                 <th style={headerStyle}>TRUE SPIN</th>
@@ -183,7 +263,7 @@ export default function Whole({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
+              {displayRows.map((row, index) => (
                 <tr 
                   key={row.id}
                   style={{
@@ -201,15 +281,27 @@ export default function Whole({
                         style={inputStyle}
                       />
                     ) : (
-                      <span>{row.playerName}</span>
+                      <span style={{ fontWeight: row.isExisting ? '500' : 'normal' }}>
+                        {row.playerName}
+                      </span>
                     )}
+                  </td>
+                  <td style={cellStyle}>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={(e) => updateRow(row.id, 'date', e.target.value)}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
+                    />
                   </td>
                   <td style={cellStyle}>
                     <input
                       type="number"
                       value={row.speed}
                       onChange={(e) => updateRow(row.id, 'speed', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -217,7 +309,8 @@ export default function Whole({
                       type="number"
                       value={row.spinRate}
                       onChange={(e) => updateRow(row.id, 'spinRate', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -225,7 +318,8 @@ export default function Whole({
                       type="number"
                       value={row.trueSpin}
                       onChange={(e) => updateRow(row.id, 'trueSpin', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -233,7 +327,8 @@ export default function Whole({
                       type="number"
                       value={row.spinEff}
                       onChange={(e) => updateRow(row.id, 'spinEff', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -241,7 +336,8 @@ export default function Whole({
                       type="number"
                       value={row.spinDirect}
                       onChange={(e) => updateRow(row.id, 'spinDirect', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -249,7 +345,8 @@ export default function Whole({
                       type="number"
                       value={row.verticalBreak}
                       onChange={(e) => updateRow(row.id, 'verticalBreak', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -257,7 +354,8 @@ export default function Whole({
                       type="number"
                       value={row.horizontalBreak}
                       onChange={(e) => updateRow(row.id, 'horizontalBreak', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
@@ -265,7 +363,8 @@ export default function Whole({
                       type="text"
                       value={row.rating}
                       onChange={(e) => updateRow(row.id, 'rating', e.target.value)}
-                      style={inputStyle}
+                      style={{...inputStyle, backgroundColor: row.isExisting ? '#f9fafb' : 'white'}}
+                      disabled={row.isExisting}
                     />
                   </td>
                   <td style={cellStyle}>
