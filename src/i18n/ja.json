@@ -133,7 +133,7 @@
   "analysis.dateOrTurn": "日付or回目",
   "analysis.speedAverage": "球速(平均)",
   "analysis.spinAverage": "回転数(平均)",
-  "analysis.scatterAxisSpeed": "速度",
+  "analysis.scatterAxisSpeed": "球速",
   "analysis.scatterAxisSpin": "回転数",
   
   "forgotPassword.title": "パスワードをお忘れの方",
